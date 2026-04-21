@@ -1,0 +1,79 @@
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: #1e3a2f;
+  color: #eee;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.sidebar h1 {
+  font-size: 18px;
+  margin: 0;
+  color: #a8d8a8;
+}
+
+.sidebar h3 {
+  font-size: 13px;
+  margin: 4px 0 2px;
+  color: #8bc98b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar hr {
+  border: none;
+  border-top: 1px solid #2e5040;
+  margin: 4px 0;
+}
+
+.undertittel {
+  font-size: 12px;
+  color: #7aaa7a;
+  margin: 0;
+}
+
+.lag-rad {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.lag-rad input {
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
+.legende {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.prikk {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.rod { background: #dc3545; }
+.oransje { background: #ff8c00; }
+.gronn { background: #228b22; }
+
+.info {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.5;
+  margin: 0;
+}
