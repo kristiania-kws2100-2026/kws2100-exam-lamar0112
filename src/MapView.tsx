@@ -5,9 +5,12 @@ import OLMap from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
+import VectorTileLayer from "ol/layer/VectorTile";
 import VectorSource from "ol/source/Vector";
+import VectorTileSource from "ol/source/VectorTile";
 import OSM from "ol/source/OSM";
 import GeoJSON from "ol/format/GeoJSON";
+import MVT from "ol/format/MVT";
 import { OverviewMap } from "ol/control";
 import { fromLonLat } from "ol/proj";
 import Feature from "ol/Feature";
@@ -197,6 +200,36 @@ export default function MapView({
       }),
     });
 
+    // ── Vector Tile-lag for dyreobservasjoner (fra Hono-backend) ──────────────
+    // Henter MVT-tiles fra /api/tiles/dyr/{z}/{x}/{y}
+    // Vite proxy videresender til localhost:3000 under utvikling
+    const dyrLayer = new VectorTileLayer({
+      source: new VectorTileSource({
+        url: "/api/tiles/dyr/{z}/{x}/{y}",
+        format: new MVT(),
+      }),
+      zIndex: 50,
+      style: (feature) => {
+        // Farge varierer etter dyregruppe basert på art-feltet
+        const art = String(feature.get("art") ?? "");
+        let farge = "#95d5b2"; // standard grønn
+
+        if (art.toLowerCase().includes("lupus")) farge = "#e63946"; // ulv → rød
+        else if (art.toLowerCase().includes("arctos")) farge = "#f4a261"; // bjørn → oransje
+        else if (art.toLowerCase().includes("alces")) farge = "#457b9d"; // elg → blå
+        else if (art.toLowerCase().includes("vulpes")) farge = "#e9c46a"; // rev → gul
+
+        return new Style({
+          image: new CircleStyle({
+            radius: 5,
+            fill: new Fill({ color: farge }),
+            stroke: new Stroke({ color: "#fff", width: 1 }),
+          }),
+        });
+      },
+    });
+
+    map.addLayer(dyrLayer);
     map.addControl(overviewMap);
     mapRef.current = map;
 

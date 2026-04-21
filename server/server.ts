@@ -16,28 +16,32 @@ const pool = new Pool({
 const app = new Hono();
 app.use("*", cors());
 
-// ─── Vector Tile endpoint (for A-karakter krav) ───────────────────────────────
-// Returnerer MVT-tiles for en stor dataset (f.eks. adresser/grunnkretser)
-// URL-mønster: /api/tiles/kommuner/:z/:x/:y
-app.get("/api/tiles/kommuner/:z/:x/:y", async (c) => {
+// ─── Vector Tile endpoint for dyreobservasjoner ───────────────────────────────
+// Returnerer MVT-tiles fra PostGIS-tabellen "dyreobservasjoner"
+// Brukes av VectorTileLayer i frontend med clustered style
+// URL-mønster: /api/tiles/dyr/:z/:x/:y
+app.get("/api/tiles/dyr/:z/:x/:y", async (c) => {
   const z = parseInt(c.req.param("z"));
   const x = parseInt(c.req.param("x"));
   const y = parseInt(c.req.param("y"));
 
   const result = await pool.query(
     `
-    SELECT ST_AsMVT(tile, 'kommuner', 4096, 'geom') AS mvt
+    SELECT ST_AsMVT(tile, 'dyreobservasjoner', 4096, 'geom') AS mvt
     FROM (
       SELECT
-        kommunenummer,
-        navn,
+        id,
+        art,
+        norsk_navn,
+        aar,
+        antall,
         ST_AsMVTGeom(
           ST_Transform(geom, 3857),
           ST_TileEnvelope($1, $2, $3),
           4096, 64, true
         ) AS geom
-      FROM kommuner
-      WHERE geom && ST_Transform(ST_TileEnvelope($1, $2, $3), 25833)
+      FROM dyreobservasjoner
+      WHERE geom && ST_Transform(ST_TileEnvelope($1, $2, $3), 4326)
     ) AS tile
     WHERE geom IS NOT NULL
     `,
@@ -51,22 +55,8 @@ app.get("/api/tiles/kommuner/:z/:x/:y", async (c) => {
 
   return c.body(mvt, 200, {
     "Content-Type": "application/x-protobuf",
-    "Cache-Control": "public, max-age=3600",
+    "Cache-Control": "public, max-age=60",
   });
-});
-
-// ─── GeoJSON endpoints ────────────────────────────────────────────────────────
-// Disse returnerer GeoJSON for mindre datasett
-
-app.get("/api/tilfluktsrom", async (c) => {
-  const result = await pool.query(`
-    SELECT json_build_object(
-      'type', 'FeatureCollection',
-      'features', json_agg(ST_AsGeoJSON(t.*)::json)
-    )
-    FROM tilfluktsrom t
-  `);
-  return c.json(result.rows[0].json_build_object);
 });
 
 // ─── Statiske filer (React-appen i produksjon) ────────────────────────────────
