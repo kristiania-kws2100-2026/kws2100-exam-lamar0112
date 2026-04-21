@@ -1,0 +1,13 @@
+# Node
+node_modules
+dist
+
+# Miljøvariabler
+.env
+.env.local
+
+# IDE
+.idea
+
+# macOS
+.DS_Store
