@@ -1,0 +1,31 @@
+{
+  "name": "kws2100-exam-lamar0112",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier . --check",
+    "prepare": "husky",
+    "postinstall": "cd server && npm install",
+    "start": "cd server && npm start"
+  },
+  "dependencies": {
+    "ol": "^10.7.0",
+    "proj4": "^2.20.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.13",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.4.1",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}
