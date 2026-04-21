@@ -17,6 +17,11 @@ import { fromLonLat } from "ol/proj";
 import { Circle, Fill, Stroke, Style, Text } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
 
+// Bruk Render-backend i produksjon, lokal proxy i utvikling
+const API_BASE = import.meta.env.PROD
+  ? "https://naturkart-server.onrender.com"
+  : "";
+
 interface Lag {
   id: string;
   navn: string;
@@ -91,7 +96,7 @@ export default function MapView({ lag }: MapViewProps) {
       source: new Cluster({
         distance: 40,
         source: new VectorSource({
-          url: "/api/dyr/geojson",
+          url: `${API_BASE}/api/dyr/geojson`,
           format: new GeoJSON(),
         }),
       }),
@@ -102,7 +107,7 @@ export default function MapView({ lag }: MapViewProps) {
     const vektorTilLag = new VectorTileLayer({
       source: new VectorTileSource({
         format: new MVT(),
-        url: "/api/tiles/dyr/{z}/{x}/{y}",
+        url: `${API_BASE}/api/tiles/dyr/{z}/{x}/{y}`,
       }),
       style: vektorTilStil,
       minZoom: 12,
