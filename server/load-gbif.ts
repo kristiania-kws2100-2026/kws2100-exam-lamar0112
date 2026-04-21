@@ -5,6 +5,7 @@ const db = new pg.Pool({
   connectionString:
     process.env.DATABASE_URL ||
     "postgresql://postgres:postgres@localhost:5432/naturkart",
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
 async function opprettTabell() {
