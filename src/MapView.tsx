@@ -12,14 +12,15 @@ import { OverviewMap } from "ol/control";
 import { fromLonLat } from "ol/proj";
 import Feature from "ol/Feature";
 
-import { Fill, Stroke, Style, Circle as CircleStyle, Text } from "ol/style";
+import { Fill, Stroke, Style, Circle as CircleStyle } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
 
 import type { SelectedFeature } from "./types";
 
 // ─── Layer definitions ────────────────────────────────────────────────────────
-// Each data source is defined here with its own style and label.
-// Add new layers by appending to LAYER_CONFIGS.
+// Legg til nye lag ved å appende til LAYER_CONFIGS.
+// Asharib: legg til nasjonalparker, verneomrader, turstier her
+// Samir: legg til hytter, fjelltopper, badestrander her
 
 type LayerConfig = {
   name: string;
@@ -31,109 +32,106 @@ type LayerConfig = {
 const BASE_URL = import.meta.env.BASE_URL;
 
 const LAYER_CONFIGS: LayerConfig[] = [
+  // ── POLYGON-LAG ──────────────────────────────────────────────────────────────
+
+  // Asharib: nasjonalparker.geojson
   {
-    name: "Fylke",
-    url: `${BASE_URL}data/fylker.geojson`,
+    name: "Nasjonalparker",
+    url: `${BASE_URL}data/nasjonalparker.geojson`,
     zIndex: 10,
     style: (_f, hovered) =>
       new Style({
-        stroke: new Stroke({ color: "#4a90d9", width: hovered ? 3 : 1.5 }),
-        fill: new Fill({ color: hovered ? "rgba(74,144,217,0.15)" : "rgba(74,144,217,0.05)" }),
+        stroke: new Stroke({
+          color: "#1b4332",
+          width: hovered ? 3 : 1.5,
+        }),
+        fill: new Fill({
+          color: hovered ? "rgba(27,67,50,0.35)" : "rgba(27,67,50,0.15)",
+        }),
       }),
   },
+
+  // Asharib: verneomrader.geojson
   {
-    name: "Kommune",
-    url: `${BASE_URL}data/kommuner.geojson`,
+    name: "Verneområder",
+    url: `${BASE_URL}data/verneomrader.geojson`,
     zIndex: 11,
     style: (_f, hovered) =>
       new Style({
-        stroke: new Stroke({ color: "#7b68ee", width: hovered ? 2 : 1 }),
-        fill: new Fill({ color: hovered ? "rgba(123,104,238,0.2)" : "rgba(123,104,238,0.05)" }),
+        stroke: new Stroke({
+          color: "#52b788",
+          width: hovered ? 2 : 1,
+        }),
+        fill: new Fill({
+          color: hovered ? "rgba(82,183,136,0.25)" : "rgba(82,183,136,0.08)",
+        }),
       }),
   },
+
+  // ── LINJE-LAG ────────────────────────────────────────────────────────────────
+
+  // Asharib: turstier.geojson (linestring — viktig for karakterkravet)
   {
-    name: "Sivilforsvarsdistrikt",
-    url: `${BASE_URL}data/sivilforsvardistrikter.geojson`,
-    zIndex: 12,
+    name: "Turstier",
+    url: `${BASE_URL}data/turstier.geojson`,
+    zIndex: 20,
     style: (_f, hovered) =>
       new Style({
-        stroke: new Stroke({ color: "#0055ff", width: hovered ? 4 : 2 }),
-        fill: new Fill({ color: hovered ? "rgba(0,85,255,0.25)" : "rgba(0,85,255,0.1)" }),
+        stroke: new Stroke({
+          color: hovered ? "#e76f51" : "#f4a261",
+          width: hovered ? 3 : 2,
+        }),
       }),
   },
+
+  // ── PUNKT-LAG ────────────────────────────────────────────────────────────────
+
+  // Samir: hytter.geojson
   {
-    name: "Tilfluktsrom",
-    url: `${BASE_URL}data/tilfluktsrom.geojson`,
+    name: "DNT-hytter",
+    url: `${BASE_URL}data/hytter.geojson`,
     zIndex: 30,
-    style: (feature, hovered, selected) => {
-      const plasser = Number(feature.get("plasser") ?? 0);
-      const radius = Math.max(4, Math.min(plasser / 100, 14));
-      return new Style({
+    style: (_f, hovered, selected) =>
+      new Style({
         image: new CircleStyle({
-          radius: radius + (selected ? 4 : hovered ? 2 : 0),
-          fill: new Fill({ color: selected ? "#ff8800" : "#ffcc00" }),
-          stroke: new Stroke({ color: "#000", width: selected ? 3 : hovered ? 2 : 1 }),
+          radius: selected ? 12 : hovered ? 10 : 8,
+          fill: new Fill({ color: "#e76f51" }),
+          stroke: new Stroke({ color: "#fff", width: 2 }),
         }),
-      });
-    },
+      }),
   },
+
+  // Samir: fjelltopper.geojson
   {
-    name: "Sykehus",
-    url: `${BASE_URL}data/sykehus.geojson`,
+    name: "Fjelltopper",
+    url: `${BASE_URL}data/fjelltopper.geojson`,
     zIndex: 31,
     style: (_f, hovered, selected) =>
       new Style({
         image: new CircleStyle({
-          radius: selected ? 12 : hovered ? 10 : 8,
-          fill: new Fill({ color: "#e74c3c" }),
+          radius: selected ? 10 : hovered ? 8 : 6,
+          fill: new Fill({ color: "#264653" }),
           stroke: new Stroke({ color: "#fff", width: 2 }),
-        }),
-        text: new Text({
-          text: "H",
-          fill: new Fill({ color: "#fff" }),
-          font: "bold 9px sans-serif",
         }),
       }),
   },
+
+  // Samir: badestrander.geojson
   {
-    name: "Brannstasjon",
-    url: `${BASE_URL}data/brannstasjoner.geojson`,
+    name: "Badestrander",
+    url: `${BASE_URL}data/badestrander.geojson`,
     zIndex: 32,
     style: (_f, hovered, selected) =>
       new Style({
         image: new CircleStyle({
-          radius: selected ? 12 : hovered ? 10 : 8,
-          fill: new Fill({ color: "#e67e22" }),
-          stroke: new Stroke({ color: "#fff", width: 2 }),
-        }),
-      }),
-  },
-  {
-    name: "AED",
-    url: `${BASE_URL}data/aed.geojson`,
-    zIndex: 33,
-    style: (_f, hovered, selected) =>
-      new Style({
-        image: new CircleStyle({
           radius: selected ? 10 : hovered ? 8 : 6,
-          fill: new Fill({ color: "#e94560" }),
-          stroke: new Stroke({ color: "#fff", width: 1.5 }),
-        }),
-      }),
-  },
-  {
-    name: "Politistasjon",
-    url: `${BASE_URL}data/politistasjoner.geojson`,
-    zIndex: 34,
-    style: (_f, hovered, selected) =>
-      new Style({
-        image: new CircleStyle({
-          radius: selected ? 12 : hovered ? 10 : 8,
-          fill: new Fill({ color: "#2980b9" }),
+          fill: new Fill({ color: "#48cae4" }),
           stroke: new Stroke({ color: "#fff", width: 2 }),
         }),
       }),
   },
+
+  // Lamar (backend): dyreobservasjoner kommer som Vector Tile Layer — legges til separat
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -151,9 +149,7 @@ export default function MapView({
 }: Props) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<OLMap | null>(null);
-
   const hoveredKeyRef = useRef<string | null>(null);
-
   const layerRefs = useRef<globalThis.Map<string, VectorLayer<VectorSource>>>(
     new globalThis.Map(),
   );
@@ -178,7 +174,7 @@ export default function MapView({
           const hovered = hoveredKeyRef.current === key;
           const selected =
             selectedFeature?.layerName === cfg.name &&
-            featureKey(cfg.name, feature) === hoveredKeyRef.current;
+            selectedFeature?.properties === feature.getProperties();
           return cfg.style(feature, hovered, selected);
         },
       });
@@ -197,9 +193,8 @@ export default function MapView({
       layers: [new TileLayer({ source: new OSM() }), ...vectorLayers],
       view: new View({
         center: fromLonLat([15.5, 65.5]),
-        zoom: 4,
+        zoom: 5,
       }),
-      controls: undefined,
     });
 
     map.addControl(overviewMap);
@@ -229,7 +224,7 @@ export default function MapView({
       }
     });
 
-    // Click → show feature details
+    // Klikk → vis feature-detaljer i sidebar
     map.on("singleclick", (evt) => {
       let found = false;
 
@@ -250,7 +245,7 @@ export default function MapView({
       if (!found) onFeatureSelect(null);
     });
 
-    // Sidebar: update visible features when map moves
+    // Oppdater sidebar med synlige features når kartet flyttes
     const updateVisible = () => {
       const extent = map.getView().calculateExtent(map.getSize());
       const visible: SelectedFeature[] = [];
@@ -277,19 +272,20 @@ export default function MapView({
 
     return () => {
       map.setTarget(undefined);
+      mapRef.current = null;
     };
   }, []);
 
-  // Re-style when selection changes
   useEffect(() => {
-    layerRefs.current.forEach((l) => l.changed());
+    layerRefs.current.forEach((l: VectorLayer<VectorSource>) => l.changed());
   }, [selectedFeature]);
 
-  return <div ref={mapDivRef} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={mapDivRef} style={{ position: "absolute", inset: 0 }} />;
 }
 
 function featureKey(layerName: string, feature: FeatureLike): string {
   const p = feature.getProperties();
-  const id = p.romnr ?? p.id ?? p.objectid ?? p.navn ?? p.name ?? Math.random();
+  const id =
+    p.id ?? p.objectid ?? p.lokalid ?? p.navn ?? p.name ?? Math.random();
   return `${layerName}:${id}`;
 }
