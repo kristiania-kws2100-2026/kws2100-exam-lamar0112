@@ -1,8 +1,8 @@
-# Node
+# Node / Vite
 node_modules
 dist
 
-# Miljøvariabler
+# Miljøvariabler (ikke push hemmelige nøkler!)
 .env
 .env.local
 
