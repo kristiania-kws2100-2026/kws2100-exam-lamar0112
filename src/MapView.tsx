@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Popup from "./Popup";
 import "ol/ol.css";
 
 import Map from "ol/Map";
@@ -76,6 +77,11 @@ export default function MapView({ lag }: MapViewProps) {
   const vektorTilLagRef = useRef<VectorTileLayer | null>(null);
   const naturvernLagRef = useRef<VectorLayer | null>(null);
 
+  const [popup, setPopup] = useState<{
+    innhold: { art: string; antall: number; dato: string | null };
+    posisjon: { x: number; y: number };
+  } | null>(null);
+
   useEffect(() => {
     if (mapRef.current) return;
 
@@ -118,13 +124,40 @@ export default function MapView({ lag }: MapViewProps) {
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
 
-    mapRef.current = new Map({
+    const map = new Map({
       target: mapDivRef.current!,
       layers: [osmLag, naturvernLag, vektorTilLag, clusterLag],
       view: new View({
         center: fromLonLat([15.5, 65.5]),
         zoom: 5,
       }),
+    });
+
+    mapRef.current = map;
+
+    // Klikk-interaksjon — vis popup med info om observasjonen
+    map.on("click", (e) => {
+      const feature = map.forEachFeatureAtPixel(e.pixel, (f) => f);
+
+      if (!feature) {
+        setPopup(null);
+        return;
+      }
+
+      // Cluster-features har en "features"-liste inni seg
+      const features = feature.get("features") as FeatureLike[] | undefined;
+      const enkelt = features ? features[0] : feature;
+
+      if (!enkelt) return;
+
+      setPopup({
+        innhold: {
+          art: enkelt.get("art") ?? "Ukjent art",
+          antall: enkelt.get("antall") ?? 1,
+          dato: enkelt.get("observert_dato") ?? null,
+        },
+        posisjon: { x: e.pixel[0], y: e.pixel[1] },
+      });
     });
 
     return () => {
@@ -142,5 +175,14 @@ export default function MapView({ lag }: MapViewProps) {
     }
   }, [lag]);
 
-  return <div ref={mapDivRef} style={{ width: "100%", height: "100%" }} />;
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <div ref={mapDivRef} style={{ width: "100%", height: "100%" }} />
+      <Popup
+        innhold={popup?.innhold ?? null}
+        posisjon={popup?.posisjon ?? null}
+        onLukk={() => setPopup(null)}
+      />
+    </div>
+  );
 }
