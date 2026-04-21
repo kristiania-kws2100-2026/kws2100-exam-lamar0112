@@ -9,6 +9,9 @@ const db = new pg.Pool({
 });
 
 async function opprettTabell() {
+  // Aktiver PostGIS-utvidelsen (nødvendig for geometry-typen)
+  await db.query(`CREATE EXTENSION IF NOT EXISTS postgis`);
+
   await db.query(`
     CREATE TABLE IF NOT EXISTS dyreobservasjoner (
       id SERIAL PRIMARY KEY,
