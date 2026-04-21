@@ -54,6 +54,28 @@ app.get("/api/tiles/dyr/:z/:x/:y", async (c) => {
   });
 });
 
+// GeoJSON-endepunkt for clustering i OpenLayers
+app.get("/api/dyr/geojson", async (c) => {
+  const result = await db.query(`
+    SELECT json_build_object(
+      'type', 'FeatureCollection',
+      'features', json_agg(
+        json_build_object(
+          'type', 'Feature',
+          'geometry', ST_AsGeoJSON(geom)::json,
+          'properties', json_build_object(
+            'id', id,
+            'art', art,
+            'antall', antall
+          )
+        )
+      )
+    ) AS geojson
+    FROM dyreobservasjoner
+  `);
+  return c.json(result.rows[0].geojson);
+});
+
 serve({ fetch: app.fetch, port: 3000 }, () => {
   console.log("Server kjører på http://localhost:3000");
 });
