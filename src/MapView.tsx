@@ -104,6 +104,14 @@ const hytterHoverStil = new Style({
   text: new Text({ text: "🏠", font: "22px sans-serif" }),
 });
 
+const fjelltopperStil = new Style({
+  text: new Text({ text: "⛰️", font: "18px sans-serif" }),
+});
+
+const fjelltopperHoverStil = new Style({
+  text: new Text({ text: "⛰️", font: "22px sans-serif" }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -113,6 +121,7 @@ export default function MapView({ lag }: MapViewProps) {
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
   const turstiLagRef = useRef<VectorLayer | null>(null);
   const hytterLagRef = useRef<VectorLayer | null>(null);
+  const fjelltopperLagRef = useRef<VectorLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
@@ -158,6 +167,15 @@ export default function MapView({ lag }: MapViewProps) {
     () =>
       new VectorSource({
         url: "/data/hytter.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const fjelltopperSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/fjelltopper.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -212,12 +230,18 @@ export default function MapView({ lag }: MapViewProps) {
       style: hytterStil,
     });
 
+    const fjelltopperLag = new VectorLayer({
+      source: fjelltopperSource,
+      style: fjelltopperStil,
+    });
+
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
     nasjonalparkLagRef.current = nasjonalparkLag;
     turstiLagRef.current = turstiLag;
     hytterLagRef.current = hytterLag;
+    fjelltopperLagRef.current = fjelltopperLag;
 
     const map = new Map({
       target: mapDivRef.current!,
@@ -227,6 +251,7 @@ export default function MapView({ lag }: MapViewProps) {
         nasjonalparkLag,
         turstiLag,
         hytterLag,
+        fjelltopperLag,
         vektorTilLag,
         clusterLag,
       ],
@@ -274,7 +299,8 @@ export default function MapView({ lag }: MapViewProps) {
           l === naturvernLag ||
           l === nasjonalparkLag ||
           l === turstiLag ||
-          l === hytterLag,
+          l === hytterLag ||
+          l === fjelltopperLag,
       });
 
       if (treff) {
@@ -289,6 +315,8 @@ export default function MapView({ lag }: MapViewProps) {
           feature.setStyle(turstiHoverStil);
         } else if (feature.get("type") !== undefined) {
           feature.setStyle(hytterHoverStil);
+        } else if (feature.get("høyde_moh") !== undefined) {
+          feature.setStyle(fjelltopperHoverStil);
         }
 
         const navn = feature.get("navn") as string | undefined;
@@ -306,7 +334,7 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource]);
 
   useEffect(() => {
     for (const l of lag) {
@@ -317,6 +345,8 @@ export default function MapView({ lag }: MapViewProps) {
         nasjonalparkLagRef.current?.setVisible(l.synlig);
       if (l.id === "tursti") turstiLagRef.current?.setVisible(l.synlig);
       if (l.id === "hytter") hytterLagRef.current?.setVisible(l.synlig);
+      if (l.id === "fjelltopper")
+        fjelltopperLagRef.current?.setVisible(l.synlig);
     }
   }, [lag]);
 
