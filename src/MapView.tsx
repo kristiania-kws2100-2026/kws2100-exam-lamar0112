@@ -75,6 +75,10 @@ const nasjonalparkStil = new Style({
   fill: new Fill({ color: "rgba(27, 67, 50, 0.25)" }),
 });
 
+const turstiStil = new Style({
+  stroke: new Stroke({ color: "#e76f00", width: 2.5, lineDash: [6, 4] }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -82,6 +86,7 @@ export default function MapView({ lag }: MapViewProps) {
   const vektorTilLagRef = useRef<VectorTileLayer | null>(null);
   const naturvernLagRef = useRef<VectorLayer | null>(null);
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
+  const turstiLagRef = useRef<VectorLayer | null>(null);
 
   const [popup, setPopup] = useState<{
     innhold: { art: string; antall: number; dato: string | null };
@@ -102,6 +107,15 @@ export default function MapView({ lag }: MapViewProps) {
     () =>
       new VectorSource({
         url: "/data/nasjonalparker.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const turstiSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/turstier.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -146,14 +160,27 @@ export default function MapView({ lag }: MapViewProps) {
       style: nasjonalparkStil,
     });
 
+    const turstiLag = new VectorLayer({
+      source: turstiSource,
+      style: turstiStil,
+    });
+
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
     nasjonalparkLagRef.current = nasjonalparkLag;
+    turstiLagRef.current = turstiLag;
 
     const map = new Map({
       target: mapDivRef.current!,
-      layers: [osmLag, naturvernLag, nasjonalparkLag, vektorTilLag, clusterLag],
+      layers: [
+        osmLag,
+        naturvernLag,
+        nasjonalparkLag,
+        turstiLag,
+        vektorTilLag,
+        clusterLag,
+      ],
       view: new View({
         // Med useGeographic() brukes lon/lat direkte — ingen fromLonLat nødvendig
         center: [15.5, 65.5],
@@ -190,7 +217,7 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource]);
 
   useEffect(() => {
     for (const l of lag) {
@@ -199,6 +226,7 @@ export default function MapView({ lag }: MapViewProps) {
       if (l.id === "naturvern") naturvernLagRef.current?.setVisible(l.synlig);
       if (l.id === "nasjonalpark")
         nasjonalparkLagRef.current?.setVisible(l.synlig);
+      if (l.id === "tursti") turstiLagRef.current?.setVisible(l.synlig);
     }
   }, [lag]);
 
