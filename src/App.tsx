@@ -51,6 +51,12 @@ const STARTLAG = [
     ikon: "🏖️",
     synlig: true,
   },
+  {
+    id: "kartverket",
+    navn: "Kartverket topo",
+    ikon: "🗺️",
+    synlig: false,
+  },
 ];
 
 export default function App() {
