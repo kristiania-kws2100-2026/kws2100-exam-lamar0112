@@ -22,7 +22,7 @@
 
 ---
 
-## STATUS PER 2026-04-23 (oppdatert etter merge av Asharib sin PR)
+## STATUS PER 2026-04-23 (FERDIG — alle lag merget, A-tillegg gjort)
 
 ### ✅ Lamar — ferdig (main)
 - Grunnkart med OSM
@@ -33,23 +33,23 @@
 - Hono-backend på Render.com med PostGIS
 - GitHub Pages deploy via Actions
 
-### ✅ Asharib — ferdig (PR #2 merget inn i main ✅)
-Branch: `lamar/asharib-naturlag`
-- `public/data/nasjonalparker.geojson` — 21 norske nasjonalparker (polygon, EPSG:4326, props: navn/areal_km2)
-- `public/data/verneomrader.geojson` — verneområder (polygon, EPSG:4326, props: navn/vernetype)
-- `public/data/turstier.geojson` — 11 turstier (linje, EPSG:4326, props: navn/lengde_km)
-- `useGeographic()` på modulnivå i MapView.tsx ✅
-- `useMemo` for alle tre VectorSource ✅
-- Hover-stil (mørk/lys grønn polygon, oransje linje) + tooltip med navn ✅
-- Lag i sidebar: Nasjonalparker 🏔️, Verneområder 🌿, Turstier 🥾
+### ✅ Asharib — ferdig (merget inn i main ✅)
+- `public/data/nasjonalparker.geojson` — 21 norske nasjonalparker (polygon)
+- `public/data/verneomrader.geojson` — verneområder (polygon)
+- `public/data/turstier.geojson` — 11 turstier (linje)
+- `useGeographic()` + `useMemo` + hover-stil + tooltip ✅
 
-### ⏳ Samir — gjenstår (branch: lamar/samir-friluft)
-- `public/data/hytter.geojson` — DNT-hytter (Point, props: navn, type, høyde_moh)
-- `public/data/fjelltopper.geojson` — fjelltopper (Point, props: navn, høyde_moh)
-- `public/data/badestrander.geojson` — badestrander (Point, props: navn, kommune)
-- Egne ikoner: 🏠 hytter / ⛰️ fjelltopper / 🏖️ badestrander
-- Hover-stil + tooltip på alle tre lag
-- Klikk → popup med relevant info
+### ✅ Samir — ferdig (merget inn i main ✅)
+- `public/data/hytter.geojson` — 12 DNT-hytter (punkt)
+- `public/data/fjelltopper.geojson` — 13 fjelltopper (punkt)
+- `public/data/badestrander.geojson` — 12 badestrander (punkt)
+- Hover-stil + klikk-popup på alle tre lag ✅
+
+### ✅ Lamar A-tillegg — ferdig (merget inn i main ✅)
+- Klikk-popup for ALLE lag (generisk Popup.tsx med 7 typer) ✅
+- Full fargelegende i sidebar ✅
+- Kartverket topografisk kart som alternativt basiskart ✅
+- README.md ✅
 
 ---
 
@@ -58,12 +58,8 @@ Branch: `lamar/asharib-naturlag`
 **Gjøres på Lamar sin PC — én ting om gangen med naturlige commits:**
 
 ### 1. ✅ Merge PR #2 fra Asharib — GJORT
-- Fikset sidetittel 'Norsk Naturkart' → 'Norsk Natur- og Friluftskart'
-- Merget lamar/asharib-naturlag → main
-
-### 2. Samir sin branch (lamar/samir-friluft)
-Opprett branch, lag GeoJSON-data + lag i MapView + hover + klikk.
-Samme mønster som Asharib — ett lag per commit.
+### 2. ✅ Samir sin branch — GJORT (merget)
+### 3–7. ✅ Alle A-tillegg gjort og merget
 
 ### 3. Utvide Popup.tsx — generisk (VIKTIG for A)
 Popup.tsx håndterer i dag bare dyreobservasjoner `{ art, antall, dato }`.
@@ -133,20 +129,19 @@ React + TypeScript + OpenLayers v10 + Hono + PostGIS på Render.com
 
 ---
 
-## Pensum-sjekkliste
+## Pensum-sjekkliste — ALT FERDIG ✅
 - [x] `useGeographic()` fra `ol/proj` — modulnivå MapView.tsx
 - [x] `useMemo` for VectorSource
 - [x] `useRef` + `useEffect` for kart-init
-- [x] Polygon-geometri
-- [x] Linje-geometri
-- [ ] Punkt-geometri (Samir)
-- [x] Hover-stil
-- [x] Klikk → vis info (dyr)
-- [ ] Klikk → vis info alle lag (Lamar A-tillegg)
+- [x] Polygon-geometri (nasjonalparker, verneomrader)
+- [x] Linje-geometri (turstier)
+- [x] Punkt-geometri (hytter, fjelltopper, badestrander, dyreobs)
+- [x] Hover-stil på alle lag
+- [x] Klikk → vis info (popup for alle 7 lag-typer)
 - [x] VectorLayer med GeoJSON
 - [x] VectorTileLayer (MVT)
 - [x] Cluster-lag
-- [ ] Kartverket WMTS (Lamar A-tillegg)
+- [x] Kartverket WMTS (alternativt basiskart)
 
 ## Mappestruktur
 ```
