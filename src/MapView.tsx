@@ -141,6 +141,9 @@ export default function MapView({ lag }: MapViewProps) {
 
   type PopupInnhold =
     | { type: "dyr"; art: string; antall: number; dato: string | null }
+    | { type: "nasjonalpark"; navn: string; areal: number }
+    | { type: "verneomrade"; navn: string; vernetype: string }
+    | { type: "tursti"; navn: string; lengde: number }
     | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
     | { type: "fjelltopp"; navn: string; høyde: number }
     | { type: "badestrand"; navn: string; kommune: string };
@@ -309,6 +312,45 @@ export default function MapView({ lag }: MapViewProps) {
       if (!enkelt) return;
 
       const pos = { x: e.pixel[0], y: e.pixel[1] };
+
+      // Nasjonalparker — har areal_km2
+      if (enkelt.get("areal_km2") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "nasjonalpark",
+            navn: enkelt.get("navn") ?? "Ukjent nasjonalpark",
+            areal: enkelt.get("areal_km2") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Verneområder — har vernetype
+      if (enkelt.get("vernetype") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "verneomrade",
+            navn: enkelt.get("navn") ?? "Ukjent verneområde",
+            vernetype: enkelt.get("vernetype") ?? "",
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Turstier — har lengde_km
+      if (enkelt.get("lengde_km") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "tursti",
+            navn: enkelt.get("navn") ?? "Ukjent tursti",
+            lengde: enkelt.get("lengde_km") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
 
       // Sjekk hyttetype-prop for DNT-hytter
       if (enkelt.get("type") !== undefined && enkelt.get("høyde_moh") !== undefined) {
