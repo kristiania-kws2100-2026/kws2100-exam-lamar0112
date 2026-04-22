@@ -22,8 +22,8 @@ export default function Sidebar({ lag, setLag }: SidebarProps) {
 
   return (
     <div className="sidebar">
-      <h1>🌲 Norsk Naturkart</h1>
-      <p className="undertittel">Dyreliv & Natur i Norge</p>
+      <h1>🌲 Norsk Natur- og Friluftskart</h1>
+      <p className="undertittel">Dyreliv og friluftsliv i Norge</p>
 
       <hr />
 
