@@ -11,6 +11,7 @@ import VectorSource from "ol/source/Vector";
 import VectorTileSource from "ol/source/VectorTile";
 import Cluster from "ol/source/Cluster";
 import OSM from "ol/source/OSM";
+import XYZ from "ol/source/XYZ";
 import GeoJSON from "ol/format/GeoJSON";
 import MVT from "ol/format/MVT";
 import { useGeographic } from "ol/proj";
@@ -131,6 +132,7 @@ export default function MapView({ lag }: MapViewProps) {
   const hytterLagRef = useRef<VectorLayer | null>(null);
   const fjelltopperLagRef = useRef<VectorLayer | null>(null);
   const badestranderLagRef = useRef<VectorLayer | null>(null);
+  const kartverketLagRef = useRef<TileLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
@@ -213,6 +215,15 @@ export default function MapView({ lag }: MapViewProps) {
 
     const osmLag = new TileLayer({ source: new OSM() });
 
+    // Kartverket topografisk kart (WMTS via XYZ-kilde)
+    const kartverketLag = new TileLayer({
+      source: new XYZ({
+        url: "https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png",
+        attributions: "© Kartverket",
+      }),
+      visible: false,
+    });
+
     const clusterLag = new VectorLayer({
       source: new Cluster({
         distance: 40,
@@ -275,11 +286,13 @@ export default function MapView({ lag }: MapViewProps) {
     hytterLagRef.current = hytterLag;
     fjelltopperLagRef.current = fjelltopperLag;
     badestranderLagRef.current = badestranderLag;
+    kartverketLagRef.current = kartverketLag;
 
     const map = new Map({
       target: mapDivRef.current!,
       layers: [
         osmLag,
+        kartverketLag,
         naturvernLag,
         nasjonalparkLag,
         turstiLag,
@@ -469,6 +482,15 @@ export default function MapView({ lag }: MapViewProps) {
         fjelltopperLagRef.current?.setVisible(l.synlig);
       if (l.id === "badestrander")
         badestranderLagRef.current?.setVisible(l.synlig);
+      if (l.id === "kartverket") {
+        kartverketLagRef.current?.setVisible(l.synlig);
+        // OSM skjules når Kartverket er aktiv
+        const osmLayers = mapRef.current
+          ?.getLayers()
+          .getArray()
+          .filter((l) => l instanceof TileLayer && l !== kartverketLagRef.current);
+        osmLayers?.forEach((osm) => osm.setVisible(!l.synlig));
+      }
     }
   }, [lag]);
 
