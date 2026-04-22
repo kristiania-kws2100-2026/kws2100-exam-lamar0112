@@ -22,7 +22,7 @@
 
 ---
 
-## STATUS PER 2026-04-23 (oppdatert etter Asharib sin økt)
+## STATUS PER 2026-04-23 (oppdatert etter merge av Asharib sin PR)
 
 ### ✅ Lamar — ferdig (main)
 - Grunnkart med OSM
@@ -33,7 +33,7 @@
 - Hono-backend på Render.com med PostGIS
 - GitHub Pages deploy via Actions
 
-### ✅ Asharib — ferdig (PR #2 åpen, klar for merge)
+### ✅ Asharib — ferdig (PR #2 merget inn i main ✅)
 Branch: `lamar/asharib-naturlag`
 - `public/data/nasjonalparker.geojson` — 21 norske nasjonalparker (polygon, EPSG:4326, props: navn/areal_km2)
 - `public/data/verneomrader.geojson` — verneområder (polygon, EPSG:4326, props: navn/vernetype)
@@ -57,10 +57,9 @@ Branch: `lamar/asharib-naturlag`
 
 **Gjøres på Lamar sin PC — én ting om gangen med naturlige commits:**
 
-### 1. Merge PR #2 fra Asharib
-```bash
-git pull origin main   # etter merge på GitHub
-```
+### 1. ✅ Merge PR #2 fra Asharib — GJORT
+- Fikset sidetittel 'Norsk Naturkart' → 'Norsk Natur- og Friluftskart'
+- Merget lamar/asharib-naturlag → main
 
 ### 2. Samir sin branch (lamar/samir-friluft)
 Opprett branch, lag GeoJSON-data + lag i MapView + hover + klikk.
