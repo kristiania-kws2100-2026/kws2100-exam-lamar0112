@@ -1,5 +1,11 @@
+type PopupInnhold =
+  | { type: "dyr"; art: string; antall: number; dato: string | null }
+  | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
+  | { type: "fjelltopp"; navn: string; høyde: number }
+  | { type: "badestrand"; navn: string; kommune: string };
+
 interface PopupProps {
-  innhold: { art: string; antall: number; dato: string | null } | null;
+  innhold: PopupInnhold | null;
   posisjon: { x: number; y: number } | null;
   onLukk: () => void;
 }
@@ -39,16 +45,51 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       >
         ✕
       </button>
-      <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-        🦌 {innhold.art}
-      </p>
-      <p style={{ margin: "0 0 2px", color: "#555" }}>
-        Antall: {innhold.antall}
-      </p>
-      {innhold.dato && (
-        <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
-          {innhold.dato}
-        </p>
+
+      {innhold.type === "dyr" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🦌 {innhold.art}
+          </p>
+          <p style={{ margin: "0 0 2px", color: "#555" }}>
+            Antall: {innhold.antall}
+          </p>
+          {innhold.dato && (
+            <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
+              {innhold.dato}
+            </p>
+          )}
+        </>
+      )}
+
+      {innhold.type === "hytte" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🏠 {innhold.navn}
+          </p>
+          <p style={{ margin: "0 0 2px", color: "#555" }}>{innhold.hyttetype}</p>
+          <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
+            {innhold.høyde} moh
+          </p>
+        </>
+      )}
+
+      {innhold.type === "fjelltopp" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            ⛰️ {innhold.navn}
+          </p>
+          <p style={{ margin: 0, color: "#555" }}>{innhold.høyde} moh</p>
+        </>
+      )}
+
+      {innhold.type === "badestrand" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🏖️ {innhold.navn}
+          </p>
+          <p style={{ margin: 0, color: "#555" }}>{innhold.kommune}</p>
+        </>
       )}
     </div>
   );
