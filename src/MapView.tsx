@@ -139,8 +139,14 @@ export default function MapView({ lag }: MapViewProps) {
     y: number;
   } | null>(null);
 
+  type PopupInnhold =
+    | { type: "dyr"; art: string; antall: number; dato: string | null }
+    | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
+    | { type: "fjelltopp"; navn: string; høyde: number }
+    | { type: "badestrand"; navn: string; kommune: string };
+
   const [popup, setPopup] = useState<{
-    innhold: { art: string; antall: number; dato: string | null };
+    innhold: PopupInnhold;
     posisjon: { x: number; y: number };
   } | null>(null);
 
@@ -302,13 +308,57 @@ export default function MapView({ lag }: MapViewProps) {
 
       if (!enkelt) return;
 
+      const pos = { x: e.pixel[0], y: e.pixel[1] };
+
+      // Sjekk hyttetype-prop for DNT-hytter
+      if (enkelt.get("type") !== undefined && enkelt.get("høyde_moh") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "hytte",
+            navn: enkelt.get("navn") ?? "Ukjent hytte",
+            hyttetype: enkelt.get("type") ?? "",
+            høyde: enkelt.get("høyde_moh") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Fjelltopper — har høyde_moh men ikke type
+      if (enkelt.get("høyde_moh") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "fjelltopp",
+            navn: enkelt.get("navn") ?? "Ukjent fjelltopp",
+            høyde: enkelt.get("høyde_moh") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Badestrander — har kommune-prop
+      if (enkelt.get("kommune") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "badestrand",
+            navn: enkelt.get("navn") ?? "Ukjent strand",
+            kommune: enkelt.get("kommune") ?? "",
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Dyreobservasjoner (cluster eller enkelt)
       setPopup({
         innhold: {
+          type: "dyr",
           art: enkelt.get("art") ?? "Ukjent art",
           antall: enkelt.get("antall") ?? 1,
           dato: enkelt.get("observert_dato") ?? null,
         },
-        posisjon: { x: e.pixel[0], y: e.pixel[1] },
+        posisjon: pos,
       });
     });
 
