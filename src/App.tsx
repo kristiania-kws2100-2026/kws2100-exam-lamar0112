@@ -27,6 +27,12 @@ const STARTLAG = [
     ikon: "🌿",
     synlig: true,
   },
+  {
+    id: "tursti",
+    navn: "Turstier",
+    ikon: "🥾",
+    synlig: true,
+  },
 ];
 
 export default function App() {
