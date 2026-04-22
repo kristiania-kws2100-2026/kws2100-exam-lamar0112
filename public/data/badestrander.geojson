@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.6514, 59.8381] },
+      "properties": { "navn": "Hvervenbukta", "kommune": "Oslo" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.6339, 59.8617] },
+      "properties": { "navn": "Ingierstrand", "kommune": "Nordre Follo" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.7242, 59.8733] },
+      "properties": { "navn": "Ekebergstranda", "kommune": "Oslo" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [5.2814, 60.3947] },
+      "properties": { "navn": "Søreide", "kommune": "Bergen" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [5.2958, 60.2981] },
+      "properties": { "navn": "Flesland", "kommune": "Bergen" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.4464, 63.4333] },
+      "properties": { "navn": "Munkholmen", "kommune": "Trondheim" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [18.9497, 69.6853] },
+      "properties": { "navn": "Telegrafbukta", "kommune": "Tromsø" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [14.4058, 67.2836] },
+      "properties": { "navn": "Langstranda", "kommune": "Bodø" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [5.7272, 58.9717] },
+      "properties": { "navn": "Sola Strand", "kommune": "Stavanger" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.4183, 59.0528] },
+      "properties": { "navn": "Ula", "kommune": "Larvik" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.0089, 58.1614] },
+      "properties": { "navn": "Hamresanden", "kommune": "Kristiansand" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.5847, 59.9581] },
+      "properties": { "navn": "Paradisbukta", "kommune": "Oslo" }
+    }
+  ]
+}
