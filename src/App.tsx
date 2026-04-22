@@ -17,7 +17,7 @@ const STARTLAG = [
   },
   {
     id: "naturvern",
-    navn: "Naturvernområder",
+    navn: "Verneområder",
     ikon: "🌿",
     synlig: true,
   },

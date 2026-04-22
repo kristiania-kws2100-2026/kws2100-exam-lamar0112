@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Popup from "./Popup";
 import "ol/ol.css";
 
@@ -13,11 +13,13 @@ import Cluster from "ol/source/Cluster";
 import OSM from "ol/source/OSM";
 import GeoJSON from "ol/format/GeoJSON";
 import MVT from "ol/format/MVT";
-import { fromLonLat } from "ol/proj";
+import { useGeographic } from "ol/proj";
 import { Circle, Fill, Stroke, Style, Text } from "ol/style";
 import type { FeatureLike } from "ol/Feature";
 
-// Bruk Render-backend i produksjon, lokal proxy i utvikling
+// Gir OpenLayers beskjed om å bruke geografiske koordinater (lon/lat) direkte
+useGeographic();
+
 const API_BASE = import.meta.env.PROD
   ? "https://naturkart-server.onrender.com"
   : "";
@@ -32,12 +34,10 @@ interface MapViewProps {
   lag: Lag[];
 }
 
-// Stil for cluster-lag
 function clusterStil(feature: FeatureLike): Style {
   const features = feature.get("features") as FeatureLike[];
   const antall = features.length;
 
-  // Enkeltobservasjon — vis hjort-emoji
   if (antall === 1) {
     return new Style({
       text: new Text({
@@ -48,7 +48,6 @@ function clusterStil(feature: FeatureLike): Style {
     });
   }
 
-  // Klynge — vis sirkel med antall
   const radius = Math.min(10 + antall * 0.4, 24);
   const farge =
     antall < 10 ? "rgba(255, 140, 0, 0.85)" : "rgba(34, 139, 34, 0.85)";
@@ -67,12 +66,8 @@ function clusterStil(feature: FeatureLike): Style {
   });
 }
 
-// Stil for Vector Tile-laget ved høy zoom — vis også emoji
 const vektorTilStil = new Style({
-  text: new Text({
-    text: "🦌",
-    font: "14px sans-serif",
-  }),
+  text: new Text({ text: "🦌", font: "14px sans-serif" }),
 });
 
 export default function MapView({ lag }: MapViewProps) {
@@ -86,6 +81,16 @@ export default function MapView({ lag }: MapViewProps) {
     innhold: { art: string; antall: number; dato: string | null };
     posisjon: { x: number; y: number };
   } | null>(null);
+
+  // useMemo sikrer at VectorSource ikke gjenskapes ved re-render
+  const naturvernSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/verneomrader.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (mapRef.current) return;
@@ -113,12 +118,8 @@ export default function MapView({ lag }: MapViewProps) {
       minZoom: 12,
     });
 
-    // Naturvernområder fra Geonorge (grenser som linjer)
     const naturvernLag = new VectorLayer({
-      source: new VectorSource({
-        url: "/naturvernomrader.geojson",
-        format: new GeoJSON(),
-      }),
+      source: naturvernSource,
       style: new Style({
         stroke: new Stroke({ color: "#2d6a4f", width: 2 }),
         fill: new Fill({ color: "rgba(45, 106, 79, 0.1)" }),
@@ -133,14 +134,14 @@ export default function MapView({ lag }: MapViewProps) {
       target: mapDivRef.current!,
       layers: [osmLag, naturvernLag, vektorTilLag, clusterLag],
       view: new View({
-        center: fromLonLat([15.5, 65.5]),
+        // Med useGeographic() brukes lon/lat direkte — ingen fromLonLat nødvendig
+        center: [15.5, 65.5],
         zoom: 5,
       }),
     });
 
     mapRef.current = map;
 
-    // Klikk-interaksjon — vis popup med info om observasjonen
     map.on("click", (e) => {
       const feature = map.forEachFeatureAtPixel(e.pixel, (f) => f);
 
@@ -149,7 +150,6 @@ export default function MapView({ lag }: MapViewProps) {
         return;
       }
 
-      // Cluster-features har en "features"-liste inni seg
       const features = feature.get("features") as FeatureLike[] | undefined;
       const enkelt = features ? features[0] : feature;
 
@@ -169,9 +169,8 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, []);
+  }, [naturvernSource]);
 
-  // Oppdater synlighet når lag-prop endres
   useEffect(() => {
     for (const l of lag) {
       if (l.id === "cluster") clusterLagRef.current?.setVisible(l.synlig);
