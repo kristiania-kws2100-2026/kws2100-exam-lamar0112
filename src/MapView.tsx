@@ -15,6 +15,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import MVT from "ol/format/MVT";
 import { useGeographic } from "ol/proj";
 import { Circle, Fill, Stroke, Style, Text } from "ol/style";
+import type Feature from "ol/Feature";
 import type { FeatureLike } from "ol/Feature";
 
 // Gir OpenLayers beskjed om å bruke geografiske koordinater (lon/lat) direkte
@@ -79,6 +80,21 @@ const turstiStil = new Style({
   stroke: new Stroke({ color: "#e76f00", width: 2.5, lineDash: [6, 4] }),
 });
 
+// Hover-stiler — lysere/tykkere versjon av hvert lag
+const nasjonalparkHoverStil = new Style({
+  stroke: new Stroke({ color: "#1b4332", width: 3 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.45)" }),
+});
+
+const naturvernHoverStil = new Style({
+  stroke: new Stroke({ color: "#2d6a4f", width: 3 }),
+  fill: new Fill({ color: "rgba(45, 106, 79, 0.28)" }),
+});
+
+const turstiHoverStil = new Style({
+  stroke: new Stroke({ color: "#e76f00", width: 4, lineDash: [6, 4] }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -87,6 +103,13 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernLagRef = useRef<VectorLayer | null>(null);
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
   const turstiLagRef = useRef<VectorLayer | null>(null);
+
+  const hoverFeatureRef = useRef<Feature | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<{
+    navn: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const [popup, setPopup] = useState<{
     innhold: { art: string; antall: number; dato: string | null };
@@ -213,6 +236,41 @@ export default function MapView({ lag }: MapViewProps) {
       });
     });
 
+    map.on("pointermove", (e) => {
+      // Nullstill forrige hover-feature
+      if (hoverFeatureRef.current) {
+        hoverFeatureRef.current.setStyle(undefined);
+        hoverFeatureRef.current = null;
+      }
+
+      const treff = map.forEachFeatureAtPixel(e.pixel, (f) => f, {
+        layerFilter: (l) =>
+          l === naturvernLag || l === nasjonalparkLag || l === turstiLag,
+      });
+
+      if (treff) {
+        const feature = treff as Feature;
+        hoverFeatureRef.current = feature;
+
+        if (feature.get("areal_km2") !== undefined) {
+          feature.setStyle(nasjonalparkHoverStil);
+        } else if (feature.get("vernetype") !== undefined) {
+          feature.setStyle(naturvernHoverStil);
+        } else if (feature.get("lengde_km") !== undefined) {
+          feature.setStyle(turstiHoverStil);
+        }
+
+        const navn = feature.get("navn") as string | undefined;
+        setHoverInfo(
+          navn ? { navn, x: e.pixel[0], y: e.pixel[1] } : null,
+        );
+        map.getViewport().style.cursor = "pointer";
+      } else {
+        setHoverInfo(null);
+        map.getViewport().style.cursor = "";
+      }
+    });
+
     return () => {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
@@ -233,6 +291,24 @@ export default function MapView({ lag }: MapViewProps) {
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <div ref={mapDivRef} style={{ width: "100%", height: "100%" }} />
+      {hoverInfo && (
+        <div
+          style={{
+            position: "absolute",
+            left: hoverInfo.x + 12,
+            top: hoverInfo.y - 8,
+            background: "rgba(0,0,0,0.75)",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: 4,
+            fontSize: 13,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {hoverInfo.navn}
+        </div>
+      )}
       <Popup
         innhold={popup?.innhold ?? null}
         posisjon={popup?.posisjon ?? null}
