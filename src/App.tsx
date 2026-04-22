@@ -33,6 +33,12 @@ const STARTLAG = [
     ikon: "🥾",
     synlig: true,
   },
+  {
+    id: "hytter",
+    navn: "DNT-hytter",
+    ikon: "🏠",
+    synlig: true,
+  },
 ];
 
 export default function App() {

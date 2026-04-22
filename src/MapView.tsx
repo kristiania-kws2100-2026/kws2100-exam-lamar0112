@@ -95,6 +95,15 @@ const turstiHoverStil = new Style({
   stroke: new Stroke({ color: "#e76f00", width: 4, lineDash: [6, 4] }),
 });
 
+// Stiler for punkt-lag
+const hytterStil = new Style({
+  text: new Text({ text: "🏠", font: "18px sans-serif" }),
+});
+
+const hytterHoverStil = new Style({
+  text: new Text({ text: "🏠", font: "22px sans-serif" }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -103,6 +112,7 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernLagRef = useRef<VectorLayer | null>(null);
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
   const turstiLagRef = useRef<VectorLayer | null>(null);
+  const hytterLagRef = useRef<VectorLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
@@ -139,6 +149,15 @@ export default function MapView({ lag }: MapViewProps) {
     () =>
       new VectorSource({
         url: "/data/turstier.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const hytterSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/hytter.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -188,11 +207,17 @@ export default function MapView({ lag }: MapViewProps) {
       style: turstiStil,
     });
 
+    const hytterLag = new VectorLayer({
+      source: hytterSource,
+      style: hytterStil,
+    });
+
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
     nasjonalparkLagRef.current = nasjonalparkLag;
     turstiLagRef.current = turstiLag;
+    hytterLagRef.current = hytterLag;
 
     const map = new Map({
       target: mapDivRef.current!,
@@ -201,6 +226,7 @@ export default function MapView({ lag }: MapViewProps) {
         naturvernLag,
         nasjonalparkLag,
         turstiLag,
+        hytterLag,
         vektorTilLag,
         clusterLag,
       ],
@@ -245,7 +271,10 @@ export default function MapView({ lag }: MapViewProps) {
 
       const treff = map.forEachFeatureAtPixel(e.pixel, (f) => f, {
         layerFilter: (l) =>
-          l === naturvernLag || l === nasjonalparkLag || l === turstiLag,
+          l === naturvernLag ||
+          l === nasjonalparkLag ||
+          l === turstiLag ||
+          l === hytterLag,
       });
 
       if (treff) {
@@ -258,6 +287,8 @@ export default function MapView({ lag }: MapViewProps) {
           feature.setStyle(naturvernHoverStil);
         } else if (feature.get("lengde_km") !== undefined) {
           feature.setStyle(turstiHoverStil);
+        } else if (feature.get("type") !== undefined) {
+          feature.setStyle(hytterHoverStil);
         }
 
         const navn = feature.get("navn") as string | undefined;
@@ -275,7 +306,7 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource, turstiSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource]);
 
   useEffect(() => {
     for (const l of lag) {
@@ -285,6 +316,7 @@ export default function MapView({ lag }: MapViewProps) {
       if (l.id === "nasjonalpark")
         nasjonalparkLagRef.current?.setVisible(l.synlig);
       if (l.id === "tursti") turstiLagRef.current?.setVisible(l.synlig);
+      if (l.id === "hytter") hytterLagRef.current?.setVisible(l.synlig);
     }
   }, [lag]);
 
