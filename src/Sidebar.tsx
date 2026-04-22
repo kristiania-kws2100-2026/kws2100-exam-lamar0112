@@ -45,20 +45,32 @@ export default function Sidebar({ lag, setLag }: SidebarProps) {
 
       <h3>Forklaring</h3>
       <div className="legende">
-        <span className="prikk rod" /> 1 observasjon
+        <span className="legende-boks" style={{ background: "#1b4332", border: "1px solid #1b4332" }} />
+        Nasjonalpark
       </div>
       <div className="legende">
-        <span className="prikk oransje" /> 2–9 observasjoner
+        <span className="legende-boks" style={{ background: "rgba(45,106,79,0.4)", border: "1px solid #2d6a4f" }} />
+        Verneområde
       </div>
       <div className="legende">
-        <span className="prikk gronn" /> 10+ observasjoner
+        <span className="legende-linje" style={{ background: "#e76f00" }} />
+        Tursti
+      </div>
+      <div className="legende">
+        <span className="prikk rod" /> 1 dyreobs.
+      </div>
+      <div className="legende">
+        <span className="prikk oransje" /> 2–9 dyreobs.
+      </div>
+      <div className="legende">
+        <span className="prikk gronn" /> 10+ dyreobs.
       </div>
 
       <hr />
 
       <p className="info">
-        Data fra <strong>GBIF / Artsdatabanken</strong>. Zoom inn for å se
-        enkeltobservasjoner.
+        Data: GBIF, Geonorge, Kartverket N50.
+        Klikk på et objekt for å se info.
       </p>
     </div>
   );

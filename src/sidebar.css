@@ -71,6 +71,22 @@
 .oransje { background: #ff8c00; }
 .gronn { background: #228b22; }
 
+.legende-boks {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.legende-linje {
+  width: 18px;
+  height: 3px;
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
 .info {
   font-size: 12px;
   color: #999;
