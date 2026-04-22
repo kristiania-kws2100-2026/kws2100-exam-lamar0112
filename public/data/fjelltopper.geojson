@@ -1,0 +1,70 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.3122, 61.6344] },
+      "properties": { "navn": "Galdhøpiggen", "høyde_moh": 2469 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.2564, 61.6083] },
+      "properties": { "navn": "Glittertind", "høyde_moh": 2452 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.3939, 61.5661] },
+      "properties": { "navn": "Store Skagastølstind", "høyde_moh": 2405 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.3478, 61.6406] },
+      "properties": { "navn": "Store Memurutind", "høyde_moh": 2366 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [15.1367, 61.8919] },
+      "properties": { "navn": "Snøhetta", "høyde_moh": 2286 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.1242, 61.4806] },
+      "properties": { "navn": "Kvitingskjølen", "høyde_moh": 2193 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.6947, 61.0228] },
+      "properties": { "navn": "Gaustatoppen", "høyde_moh": 1883 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [18.5611, 69.3831] },
+      "properties": { "navn": "Tromsdalstinden", "høyde_moh": 1238 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [7.0536, 60.6008] },
+      "properties": { "navn": "Hallingskarvet", "høyde_moh": 1933 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [23.2994, 70.0542] },
+      "properties": { "navn": "Kvænangsfjellet", "høyde_moh": 1119 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.5658, 61.3867] },
+      "properties": { "navn": "Blåbreen", "høyde_moh": 1863 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [14.7039, 62.5386] },
+      "properties": { "navn": "Sølen", "høyde_moh": 1755 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [10.0469, 59.8597] },
+      "properties": { "navn": "Kolsås", "høyde_moh": 383 }
+    }
+  ]
+}

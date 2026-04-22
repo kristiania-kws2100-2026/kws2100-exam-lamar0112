@@ -33,6 +33,24 @@ const STARTLAG = [
     ikon: "🥾",
     synlig: true,
   },
+  {
+    id: "hytter",
+    navn: "DNT-hytter",
+    ikon: "🏠",
+    synlig: true,
+  },
+  {
+    id: "fjelltopper",
+    navn: "Fjelltopper",
+    ikon: "⛰️",
+    synlig: true,
+  },
+  {
+    id: "badestrander",
+    navn: "Badestrander",
+    ikon: "🏖️",
+    synlig: true,
+  },
 ];
 
 export default function App() {

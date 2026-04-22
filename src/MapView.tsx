@@ -95,6 +95,31 @@ const turstiHoverStil = new Style({
   stroke: new Stroke({ color: "#e76f00", width: 4, lineDash: [6, 4] }),
 });
 
+// Stiler for punkt-lag
+const hytterStil = new Style({
+  text: new Text({ text: "🏠", font: "18px sans-serif" }),
+});
+
+const hytterHoverStil = new Style({
+  text: new Text({ text: "🏠", font: "22px sans-serif" }),
+});
+
+const fjelltopperStil = new Style({
+  text: new Text({ text: "⛰️", font: "18px sans-serif" }),
+});
+
+const fjelltopperHoverStil = new Style({
+  text: new Text({ text: "⛰️", font: "22px sans-serif" }),
+});
+
+const badestranderStil = new Style({
+  text: new Text({ text: "🏖️", font: "18px sans-serif" }),
+});
+
+const badestranderHoverStil = new Style({
+  text: new Text({ text: "🏖️", font: "22px sans-serif" }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -103,6 +128,9 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernLagRef = useRef<VectorLayer | null>(null);
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
   const turstiLagRef = useRef<VectorLayer | null>(null);
+  const hytterLagRef = useRef<VectorLayer | null>(null);
+  const fjelltopperLagRef = useRef<VectorLayer | null>(null);
+  const badestranderLagRef = useRef<VectorLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
@@ -111,8 +139,14 @@ export default function MapView({ lag }: MapViewProps) {
     y: number;
   } | null>(null);
 
+  type PopupInnhold =
+    | { type: "dyr"; art: string; antall: number; dato: string | null }
+    | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
+    | { type: "fjelltopp"; navn: string; høyde: number }
+    | { type: "badestrand"; navn: string; kommune: string };
+
   const [popup, setPopup] = useState<{
-    innhold: { art: string; antall: number; dato: string | null };
+    innhold: PopupInnhold;
     posisjon: { x: number; y: number };
   } | null>(null);
 
@@ -139,6 +173,33 @@ export default function MapView({ lag }: MapViewProps) {
     () =>
       new VectorSource({
         url: "/data/turstier.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const hytterSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/hytter.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const fjelltopperSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/fjelltopper.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const badestranderSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/badestrander.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -188,11 +249,29 @@ export default function MapView({ lag }: MapViewProps) {
       style: turstiStil,
     });
 
+    const hytterLag = new VectorLayer({
+      source: hytterSource,
+      style: hytterStil,
+    });
+
+    const fjelltopperLag = new VectorLayer({
+      source: fjelltopperSource,
+      style: fjelltopperStil,
+    });
+
+    const badestranderLag = new VectorLayer({
+      source: badestranderSource,
+      style: badestranderStil,
+    });
+
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
     nasjonalparkLagRef.current = nasjonalparkLag;
     turstiLagRef.current = turstiLag;
+    hytterLagRef.current = hytterLag;
+    fjelltopperLagRef.current = fjelltopperLag;
+    badestranderLagRef.current = badestranderLag;
 
     const map = new Map({
       target: mapDivRef.current!,
@@ -201,6 +280,9 @@ export default function MapView({ lag }: MapViewProps) {
         naturvernLag,
         nasjonalparkLag,
         turstiLag,
+        hytterLag,
+        fjelltopperLag,
+        badestranderLag,
         vektorTilLag,
         clusterLag,
       ],
@@ -226,13 +308,57 @@ export default function MapView({ lag }: MapViewProps) {
 
       if (!enkelt) return;
 
+      const pos = { x: e.pixel[0], y: e.pixel[1] };
+
+      // Sjekk hyttetype-prop for DNT-hytter
+      if (enkelt.get("type") !== undefined && enkelt.get("høyde_moh") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "hytte",
+            navn: enkelt.get("navn") ?? "Ukjent hytte",
+            hyttetype: enkelt.get("type") ?? "",
+            høyde: enkelt.get("høyde_moh") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Fjelltopper — har høyde_moh men ikke type
+      if (enkelt.get("høyde_moh") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "fjelltopp",
+            navn: enkelt.get("navn") ?? "Ukjent fjelltopp",
+            høyde: enkelt.get("høyde_moh") ?? 0,
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Badestrander — har kommune-prop
+      if (enkelt.get("kommune") !== undefined) {
+        setPopup({
+          innhold: {
+            type: "badestrand",
+            navn: enkelt.get("navn") ?? "Ukjent strand",
+            kommune: enkelt.get("kommune") ?? "",
+          },
+          posisjon: pos,
+        });
+        return;
+      }
+
+      // Dyreobservasjoner (cluster eller enkelt)
       setPopup({
         innhold: {
+          type: "dyr",
           art: enkelt.get("art") ?? "Ukjent art",
           antall: enkelt.get("antall") ?? 1,
           dato: enkelt.get("observert_dato") ?? null,
         },
-        posisjon: { x: e.pixel[0], y: e.pixel[1] },
+        posisjon: pos,
       });
     });
 
@@ -245,7 +371,12 @@ export default function MapView({ lag }: MapViewProps) {
 
       const treff = map.forEachFeatureAtPixel(e.pixel, (f) => f, {
         layerFilter: (l) =>
-          l === naturvernLag || l === nasjonalparkLag || l === turstiLag,
+          l === naturvernLag ||
+          l === nasjonalparkLag ||
+          l === turstiLag ||
+          l === hytterLag ||
+          l === fjelltopperLag ||
+          l === badestranderLag,
       });
 
       if (treff) {
@@ -258,6 +389,12 @@ export default function MapView({ lag }: MapViewProps) {
           feature.setStyle(naturvernHoverStil);
         } else if (feature.get("lengde_km") !== undefined) {
           feature.setStyle(turstiHoverStil);
+        } else if (feature.get("type") !== undefined) {
+          feature.setStyle(hytterHoverStil);
+        } else if (feature.get("høyde_moh") !== undefined) {
+          feature.setStyle(fjelltopperHoverStil);
+        } else if (feature.get("kommune") !== undefined) {
+          feature.setStyle(badestranderHoverStil);
         }
 
         const navn = feature.get("navn") as string | undefined;
@@ -275,7 +412,7 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource, turstiSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource, badestranderSource]);
 
   useEffect(() => {
     for (const l of lag) {
@@ -285,6 +422,11 @@ export default function MapView({ lag }: MapViewProps) {
       if (l.id === "nasjonalpark")
         nasjonalparkLagRef.current?.setVisible(l.synlig);
       if (l.id === "tursti") turstiLagRef.current?.setVisible(l.synlig);
+      if (l.id === "hytter") hytterLagRef.current?.setVisible(l.synlig);
+      if (l.id === "fjelltopper")
+        fjelltopperLagRef.current?.setVisible(l.synlig);
+      if (l.id === "badestrander")
+        badestranderLagRef.current?.setVisible(l.synlig);
     }
   }, [lag]);
 
