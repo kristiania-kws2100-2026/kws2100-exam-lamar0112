@@ -1,5 +1,8 @@
 type PopupInnhold =
   | { type: "dyr"; art: string; antall: number; dato: string | null }
+  | { type: "nasjonalpark"; navn: string; areal: number }
+  | { type: "verneomrade"; navn: string; vernetype: string }
+  | { type: "tursti"; navn: string; lengde: number }
   | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
   | { type: "fjelltopp"; navn: string; høyde: number }
   | { type: "badestrand"; navn: string; kommune: string };
@@ -45,6 +48,33 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       >
         ✕
       </button>
+
+      {innhold.type === "nasjonalpark" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🏔️ {innhold.navn}
+          </p>
+          <p style={{ margin: 0, color: "#555" }}>{innhold.areal.toLocaleString("no")} km²</p>
+        </>
+      )}
+
+      {innhold.type === "verneomrade" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🌿 {innhold.navn}
+          </p>
+          <p style={{ margin: 0, color: "#555" }}>{innhold.vernetype}</p>
+        </>
+      )}
+
+      {innhold.type === "tursti" && (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🥾 {innhold.navn}
+          </p>
+          <p style={{ margin: 0, color: "#555" }}>{innhold.lengde} km</p>
+        </>
+      )}
 
       {innhold.type === "dyr" && (
         <>
