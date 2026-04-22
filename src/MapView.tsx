@@ -70,12 +70,18 @@ const vektorTilStil = new Style({
   text: new Text({ text: "🦌", font: "14px sans-serif" }),
 });
 
+const nasjonalparkStil = new Style({
+  stroke: new Stroke({ color: "#1b4332", width: 2 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.25)" }),
+});
+
 export default function MapView({ lag }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const clusterLagRef = useRef<VectorLayer | null>(null);
   const vektorTilLagRef = useRef<VectorTileLayer | null>(null);
   const naturvernLagRef = useRef<VectorLayer | null>(null);
+  const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
 
   const [popup, setPopup] = useState<{
     innhold: { art: string; antall: number; dato: string | null };
@@ -87,6 +93,15 @@ export default function MapView({ lag }: MapViewProps) {
     () =>
       new VectorSource({
         url: "/data/verneomrader.geojson",
+        format: new GeoJSON(),
+      }),
+    [],
+  );
+
+  const nasjonalparkSource = useMemo(
+    () =>
+      new VectorSource({
+        url: "/data/nasjonalparker.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -126,13 +141,19 @@ export default function MapView({ lag }: MapViewProps) {
       }),
     });
 
+    const nasjonalparkLag = new VectorLayer({
+      source: nasjonalparkSource,
+      style: nasjonalparkStil,
+    });
+
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
+    nasjonalparkLagRef.current = nasjonalparkLag;
 
     const map = new Map({
       target: mapDivRef.current!,
-      layers: [osmLag, naturvernLag, vektorTilLag, clusterLag],
+      layers: [osmLag, naturvernLag, nasjonalparkLag, vektorTilLag, clusterLag],
       view: new View({
         // Med useGeographic() brukes lon/lat direkte — ingen fromLonLat nødvendig
         center: [15.5, 65.5],
@@ -169,13 +190,15 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource]);
+  }, [naturvernSource, nasjonalparkSource]);
 
   useEffect(() => {
     for (const l of lag) {
       if (l.id === "cluster") clusterLagRef.current?.setVisible(l.synlig);
       if (l.id === "vektortil") vektorTilLagRef.current?.setVisible(l.synlig);
       if (l.id === "naturvern") naturvernLagRef.current?.setVisible(l.synlig);
+      if (l.id === "nasjonalpark")
+        nasjonalparkLagRef.current?.setVisible(l.synlig);
     }
   }, [lag]);
 

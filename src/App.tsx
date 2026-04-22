@@ -16,6 +16,12 @@ const STARTLAG = [
     synlig: true,
   },
   {
+    id: "nasjonalpark",
+    navn: "Nasjonalparker",
+    ikon: "🏔️",
+    synlig: true,
+  },
+  {
     id: "naturvern",
     navn: "Verneområder",
     ikon: "🌿",
