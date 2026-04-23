@@ -8,11 +8,11 @@ Vi delte opp ansvarsområdene tidlig og holdt oss ganske mye til dem, men hjalp 
 
 ## Hva hver person gjorde
 
-Lamar satte opp prosjektet fra scratch: React, TypeScript, Vite og OpenLayers, Hono-backend med PostgreSQL og PostGIS på Render, datainnlasting fra GBIF med 5000+ dyreobservasjoner, clustering og vector tiles, deploy til GitHub Pages og Render, og avslutningsvis oversiktskart, generisk popup-system og Kartverket-kart.
+Lamar satte opp prosjektet fra scratch: React, TypeScript, Vite og OpenLayers, Hono-backend med PostgreSQL og PostGIS på Render, datainnlasting fra GBIF med paginering (opptil 15 000 observasjoner), clustering og vector tiles, deploy til GitHub Pages og Render, og avslutningsvis oversiktskart, generisk popup-system og Kartverket-kart.
 
 Asharib hadde naturlagene. Han la til nasjonalparker og verneområder som polygoner og turstier som linje, implementerte useGeographic() og useMemo for VectorSource, og laget hover-stil og tooltip på alle tre lag.
 
-Samir hadde punktlagene: DNT-hytter, fjelltopper og badestrander. Han laget og utvidet GeoJSON-dataene, og forbedret popup-håndteringen med null-sikre hjelpefunksjoner for alle feltene.
+Samir hadde punktlagene: DNT-hytter, fjelltopper og badestrander. Han laget og utvidet GeoJSON-dataene, forbedret popup-håndteringen med null-sikre hjelpefunksjoner for alle feltene, og bidro til sidepanelet med fjelltoppliste og «tilbake til forrige visning» (lagring av kartutsnitt i `sessionStorage` sammen med Lamar i `App.tsx` / `MapView.tsx`).
 
 ## Pensumdekning
 

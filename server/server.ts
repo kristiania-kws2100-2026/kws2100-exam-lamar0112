@@ -20,6 +20,7 @@ app.get("/api/tiles/dyr/:z/:x/:y", async (c) => {
   const x = parseInt(c.req.param("x"));
   const y = parseInt(c.req.param("y"));
 
+  // geom er EPSG:4326 — transformér til 3857 sammen med ST_TileEnvelope for korrekt MVT-klipp
   const result = await db.query(
     `
     SELECT ST_AsMVT(tile, 'dyr', 4096, 'geom') AS mvt
@@ -30,12 +31,12 @@ app.get("/api/tiles/dyr/:z/:x/:y", async (c) => {
         antall,
         observert_dato,
         ST_AsMVTGeom(
-          geom,
+          ST_Transform(geom, 3857),
           ST_TileEnvelope($1, $2, $3),
           4096, 64, true
         ) AS geom
       FROM dyreobservasjoner
-      WHERE geom && ST_TileEnvelope($1, $2, $3)
+      WHERE ST_Transform(geom, 3857) && ST_TileEnvelope($1, $2, $3)
     ) AS tile
   `,
     [z, x, y],

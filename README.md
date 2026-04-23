@@ -16,7 +16,7 @@ Tenk deg at du planlegger en tur i norsk natur. Du vil vite: Hvor kan jeg gå? E
 
 Norsk Natur- og Friluftskart samler denne informasjonen på ett sted. Kartet er rettet mot turgåere, naturinteresserte og alle som vil utforske norsk natur — fra nasjonalparkene i nord til badestrendene langs kysten.
 
-Applikasjonen viser 5 000+ dyreobservasjoner fra Artsdatabanken, alle norske nasjonalparker og vernede naturområder, merkede turstier, DNT-hytter, fjelltopper og populære badestrander. Et klikk på et objekt gir deg navn, type og relevant info.
+Applikasjonen viser opptil 15 000 dyreobservasjoner (pattedyr i Norge via GBIF), alle norske nasjonalparker og vernede naturområder, merkede turstier, DNT-hytter, fjelltopper og populære badestrander. Et klikk på et objekt gir deg navn, type og relevant info.
 
 ---
 
@@ -72,7 +72,7 @@ Veksle mellom OpenStreetMap og Kartverket topografisk kart via lagkontrollen.
 - Hover-stil på alle 6 vektorlag
 - Klikk → popup med typebasert info (generisk diskriminert union i TypeScript)
 - VectorTileLayer (MVT) via backend — avansert feature ved zoom 12+
-- Cluster-lag for 5 000+ dyreobservasjoner med størrelsesbasert stil
+- Cluster-lag for tusenvis av dyreobservasjoner (GBIF, opptil 15 000) med størrelsesbasert stil
 - OverviewMap control
 - To basiskart: OSM + Kartverket topografisk (WMTS)
 
@@ -88,7 +88,7 @@ Vi jobbet mye rundt samme skjerm og var alle tre til stede gjennom de to eksamen
 
 - **Lamar:** Backend (Hono, PostGIS, GBIF-paginering), clustering, Vector Tiles, GitHub Pages deploy, OverviewMap, Kartverket basiskart, popup-system, prosjektstruktur
 - **Asharib:** Naturlag (nasjonalparker og verneomrader som polygoner, turstier som linjestrenger), hover-stiler, `useGeographic()` + `useMemo`
-- **Samir:** Punktlag (hytter, fjelltopper, badestrander), GeoJSON-data, popup-forbedringer, sidepanel-synkronisering med sessionStorage, dataforbedring fra Miljødirektoratets API
+- **Samir:** Punktlag (hytter, fjelltopper, badestrander), GeoJSON-data, popup-forbedringer, fjelltoppliste og «tilbake»-flyt med `sessionStorage` (sammen med Lamar), dataforbedring fra Miljødirektoratets API
 
 Mer detaljer i [CONTRIBUTIONS.md](CONTRIBUTIONS.md).
 
@@ -109,9 +109,22 @@ Klikker du på en tursti på kartet, viser popupen lengde, vanskelighetsgrad og 
 
 ---
 
-## Datakilder
+## Datakilder (kort)
 
-- [GBIF](https://www.gbif.org) — dyreobservasjoner (CC BY 4.0)
-- [Miljødirektoratets kartapplikasjon](https://kart.miljodirektoratet.no) — nasjonalparker, verneområder (CC BY 4.0)
-- [Geonorge](https://www.geonorge.no) — turstier, badestrander (CC BY 4.0)
-- [Kartverket N50](https://www.kartverket.no) — hytter, fjelltopper, topokart (CC BY 4.0)
+Dataene er hentet fra offentlige kilder med åpne lisenser (typisk CC BY 4.0 der kilden angir det). Detaljerte referanser i APA 7 finner du under.
+
+## Referanser (APA 7)
+
+Hentet 24. april 2026 (med mindre annet er angitt).
+
+Artsdatabanken. (u.å.). *Artsdatabanken*. https://artsdatabanken.no
+
+Geonorge. (u.å.). *Geonorge*. https://www.geonorge.no
+
+Global Biodiversity Information Facility. (u.å.). *GBIF occurrence search API*. https://www.gbif.org/
+
+Kartverket. (u.å.). *Kartverket*. https://www.kartverket.no
+
+Miljødirektoratet. (u.å.). *Kartløsninger*. https://kart.miljodirektoratet.no
+
+OpenStreetMap-bidragsytere. (u.å.). *OpenStreetMap*. https://www.openstreetmap.org/copyright

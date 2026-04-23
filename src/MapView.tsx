@@ -292,7 +292,8 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
           const [lon, lat] = geom.getCoordinates();
           return { navn: tekstverdi(f.get("navn"), "Ukjent"), høyde: tallverdi(f.get("høyde_moh")) ?? 0, koordinater: [lon, lat] as [number, number] };
         })
-        .filter((t): t is FjelltoppInfo => t !== null);
+        .filter((t): t is FjelltoppInfo => t !== null)
+        .sort((a, b) => b.høyde - a.høyde);
       onSynligeFjelltopperEndret(topper);
     };
 

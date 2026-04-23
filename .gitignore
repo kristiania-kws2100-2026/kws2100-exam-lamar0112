@@ -11,7 +11,3 @@ dist
 
 # macOS
 .DS_Store
-
-# Lokale AI-notater / arbeidslogger (ikke del av innlevering)
-CLAUDE.md
-AGENTS.md
