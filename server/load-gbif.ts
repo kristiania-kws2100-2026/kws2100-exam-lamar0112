@@ -8,10 +8,17 @@ const db = new pg.Pool({
   ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
 });
 
-async function opprettTabell() {
-  // Aktiver PostGIS-utvidelsen (nødvendig for geometry-typen)
-  await db.query(`CREATE EXTENSION IF NOT EXISTS postgis`);
+type GbifObs = {
+  key: number;
+  species?: string;
+  individualCount?: number;
+  eventDate?: string;
+  decimalLatitude: number;
+  decimalLongitude: number;
+};
 
+async function opprettTabell() {
+  await db.query(`CREATE EXTENSION IF NOT EXISTS postgis`);
   await db.query(`
     CREATE TABLE IF NOT EXISTS dyreobservasjoner (
       id SERIAL PRIMARY KEY,
@@ -27,8 +34,7 @@ async function opprettTabell() {
   console.log("Tabell klar");
 }
 
-async function lastData() {
-  // Henter norske pattedyrobservasjoner fra GBIF
+async function hentSide(offset: number): Promise<{ results: GbifObs[]; endOfRecords: boolean }> {
   const url =
     "https://api.gbif.org/v1/occurrence/search?" +
     new URLSearchParams({
@@ -36,30 +42,32 @@ async function lastData() {
       class: "Mammalia",
       hasCoordinate: "true",
       hasGeospatialIssue: "false",
-      limit: "5000",
+      limit: "300",
+      offset: String(offset),
     });
-
-  console.log("Henter data fra GBIF...");
   const res = await fetch(url);
-  const data = await res.json();
+  return res.json() as Promise<{ results: GbifObs[]; endOfRecords: boolean }>;
+}
 
-  const observasjoner = data.results as Array<{
-    key: number;
-    species?: string;
-    individualCount?: number;
-    eventDate?: string;
-    decimalLatitude: number;
-    decimalLongitude: number;
-  }>;
+async function lastData() {
+  const maks = 3000;
+  const alleObservasjoner: GbifObs[] = [];
 
-  console.log(`Fant ${observasjoner.length} observasjoner`);
+  console.log("Henter data fra GBIF (paginert)...");
 
-  // Slett gamle data og last inn på nytt
+  for (let offset = 0; offset < maks; offset += 300) {
+    const side = await hentSide(offset);
+    alleObservasjoner.push(...side.results);
+    console.log(`  Hentet ${alleObservasjoner.length} så langt...`);
+    if (side.endOfRecords) break;
+  }
+
+  console.log(`Totalt ${alleObservasjoner.length} observasjoner — laster inn...`);
+
   await db.query("DELETE FROM dyreobservasjoner");
 
-  for (const obs of observasjoner) {
+  for (const obs of alleObservasjoner) {
     if (!obs.decimalLatitude || !obs.decimalLongitude) continue;
-
     await db.query(
       `INSERT INTO dyreobservasjoner (art, antall, observert_dato, geom)
        VALUES ($1, $2, $3, ST_SetSRID(ST_MakePoint($4, $5), 4326))`,
