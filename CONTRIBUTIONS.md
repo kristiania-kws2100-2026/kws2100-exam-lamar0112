@@ -1,52 +1,32 @@
-# Contributions and Course Coverage
+# Bidrag og pensumdekning
 
-Dette dokumentet beskriver hvem som gjorde hva i gruppeeksamen, og hvordan løsningen dekker sentrale tema i KWS2100.
+## Hvordan vi jobbet
 
-## Arbeidsmåte
+Vi var alle tre til stede alle dagene eksamen varte. En god del av kodingen foregikk rundt én skjerm, særlig den første kvelden da vi klonet repoet og bygde opp hele strukturen på Asharibs PC. En del commits fra den perioden er derfor registrert under Asharibs og Lamars brukernavn, selv om alle tre bidro.
 
-- Vi jobbet med feature-branches og pull requests.
-- Flere økter ble gjennomfort som pair programming ved samme PC.
-- Derfor samsvarer ikke commit-antall alltid 1:1 med faktisk faglig bidrag.
+Vi delte opp ansvarsområdene tidlig og holdt oss ganske mye til dem, men hjalp hverandre en del underveis. Integrasjonsbiten, feilsøkingen rundt deploy og SSL, og popup-systemet som måtte håndtere alle lagtyper, krevde at vi jobbet gjennom ting i fellesskap.
 
-## Bidrag per gruppemedlem
+## Hva hver person gjorde
 
-### Lamar
+Lamar satte opp prosjektet fra scratch: React, TypeScript, Vite og OpenLayers, Hono-backend med PostgreSQL og PostGIS på Render, datainnlasting fra GBIF med 5000+ dyreobservasjoner, clustering og vector tiles, deploy til GitHub Pages og Render, og avslutningsvis oversiktskart, generisk popup-system og Kartverket-kart.
 
-- Oppsett av prosjektstruktur (React, TypeScript, Vite, OpenLayers)
-- Backend med Hono + PostgreSQL/PostGIS
-- Datainnhenting fra GBIF og innlasting til PostGIS
-- Cluster-lag + vector tiles (MVT) for skalerbar visning
-- Deploy til GitHub Pages og Render
-- Integrasjon og sluttforbedringer (overview map, basiskartvalg, helhet)
+Asharib hadde naturlagene. Han la til nasjonalparker og verneområder som polygoner og turstier som linje, implementerte useGeographic() og useMemo for VectorSource, og laget hover-stil og tooltip på alle tre lag.
 
-### Asharib
+Samir hadde punktlagene: DNT-hytter, fjelltopper og badestrander. Han laget og utvidet GeoJSON-dataene, og forbedret popup-håndteringen med null-sikre hjelpefunksjoner for alle feltene.
 
-- Nasjonalparker (polygon) med stil og interaksjon
-- Verneområder (polygon) med stil og interaksjon
-- Turstier (linje) med stil og interaksjon
-- Hover-tilbakemelding og tydeliggjort kartlesbarhet
+## Pensumdekning
 
-### Samir
-
-- DNT-hytter (punkt) med egenskaper
-- Fjelltopper (punkt) med egenskaper
-- Badestrander (punkt) med egenskaper
-- Popup-innhold og brukerrettet informasjon for punktlag
-
-## Dekning av pensumtema
-
-- React + TypeScript komponentarkitektur
-- OpenLayers med `useRef` + `useEffect` for kartinitialisering
-- `useGeographic()` og geografiske koordinater
-- `useMemo` for stabile datasources i kartlag
-- Geometrier: punkt, linje og polygon
-- Hover + klikkinteraksjon med popup/tooltip
-- Flere basiskart (OSM + Kartverket)
+- React og TypeScript med komponentarkitektur (App, MapView, Sidebar, Popup)
+- OpenLayers med useRef og useEffect for kartinitialisering
+- useGeographic() fra ol/proj for geografiske koordinater
+- useMemo for stabile VectorSource-instanser
+- Alle tre geometrityper: punkt, linje og polygon
+- Hover med tilpasset stil per lagtype
+- Klikk-popup med TypeScript discriminated union
+- To basiskart: OSM og Kartverket topografisk
+- OverviewMap fra ol/control
 - Backend-API med Hono
-- PostGIS-lagring av geografiske data
-- Vector tiles (MVT) for effektiv dataoverforing
-- Deploy av frontend/backend i sky (GitHub Pages + Render)
-
-## Kommentar om commit-fordeling
-
-Sensor skal vurdere faglig resultat, begrunnelser og pensumbruk. Commit-historikk gir nyttig sporbarhet, men ved samarbeid pa samme maskin kan den undervurdere enkelte bidrag. Denne filen og README brukes derfor for presis og etterprøvbar rollebeskrivelse.
+- PostGIS med GIST-indeks for romlige spørringer
+- Vector tiles (MVT) via backend ved høyt zoom
+- Cluster-lag med ol/source/Cluster for mange punkter
+- Deploy av frontend og backend i skyen

@@ -56,13 +56,11 @@ Alle lag kan slås av og på i sidepanelet. Dyreobservasjoner vises som cluster 
 
 ### Arbeidsfordeling
 
-Arbeidet ble utført som pair programming der alle tre gruppemedlemmer deltok aktivt:
+Vi var alle tre til stede alle dagene og jobbet mye rundt samme skjerm. Lamar eier repoet og mergde alle PR-er, men de lange kveldene satt vi som regel alle tre inne i koden, særlig da grunnstrukturen ble bygd den første kvelden.
 
-- **Lamar** — grunnkart, backend (Hono + PostGIS), GBIF-integrasjon, clustering, Vector Tile Layer, deploy, A-tillegg (oversiktskart, generisk popup, fargelegende, Kartverket-kart)
-- **Asharib** — nasjonalparker (polygon), verneområder (polygon), turstier (linje), hover + tooltip
-- **Samir** — DNT-hytter (punkt), fjelltopper (punkt), badestrander (punkt), hover + klikk-popup
+Lamar hadde backend, GBIF-integrasjon, clustering og deploy. Asharib tok seg av naturlagene: nasjonalparker og verneområder som polygoner, turstier som linje, med hover og tooltip. Samir hadde punktlagene: hytter, fjelltopper og badestrander, pluss GeoJSON-dataene for disse.
 
-Samir sin kode ble skrevet på Lamar sin PC under pair programming-session 22. april, noe som forklarer at Samirs commits vises under Lamars brukernavn i deler av historikken.
+21. april kveld klonet vi repoet på Asharibs PC og bygde prosjektet opp derfra. En del commits fra den perioden ligger under Asharibs og Lamars navn. Mer detaljer i [CONTRIBUTIONS.md](CONTRIBUTIONS.md).
 
 ---
 
@@ -71,15 +69,3 @@ Samir sin kode ble skrevet på Lamar sin PC under pair programming-session 22. a
 - [GBIF](https://www.gbif.org) — dyreobservasjoner (CC BY 4.0)
 - [Geonorge](https://www.geonorge.no) — nasjonalparker, verneområder, turstier, badestrander (CC BY 4.0)
 - [Kartverket N50](https://www.kartverket.no) — hytter, fjelltopper, topokart (CC BY 4.0)
-
----
-
-## Git og samarbeid (vurderingskontekst)
-
-Vi har jobbet med branch + pull request som anbefalt i emnet. Noe av implementasjonen ble gjort som pair programming ved samme skjerm, og enkelte commits ble derfor registrert på én bruker selv om flere bidro i økten.
-
-- **Lamar**: oppsett, backend, datalasting, deploy, integrasjon og sluttføring
-- **Asharib**: naturlag (polygon/linje), styling og interaksjon
-- **Samir**: punktlag, egenskapsdata og popup-innhold
-
-For å gjøre arbeidsfordeling og pensumdekning tydeligere enn ren commit-telling, er bidragene dokumentert i `CONTRIBUTIONS.md`.
