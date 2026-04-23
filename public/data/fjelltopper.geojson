@@ -65,6 +65,26 @@
       "type": "Feature",
       "geometry": { "type": "Point", "coordinates": [10.0469, 59.8597] },
       "properties": { "navn": "Kolsås", "høyde_moh": 383 }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Gaustatoppen", "høyde_moh": 1883 },
+      "geometry": { "type": "Point", "coordinates": [8.6527, 59.8540] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Stetind", "høyde_moh": 1392 },
+      "geometry": { "type": "Point", "coordinates": [17.0694, 68.1521] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Romsdalshorn", "høyde_moh": 1550 },
+      "geometry": { "type": "Point", "coordinates": [7.7102, 62.4478] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Skålatårnet", "høyde_moh": 1848 },
+      "geometry": { "type": "Point", "coordinates": [6.8247, 61.8674] }
     }
   ]
 }
