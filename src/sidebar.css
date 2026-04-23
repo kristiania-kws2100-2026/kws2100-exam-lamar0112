@@ -42,13 +42,21 @@
   gap: 8px;
   font-size: 14px;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  margin: 0 -8px;
+}
+
+.lag-rad:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .lag-rad input {
   cursor: pointer;
   width: 15px;
   height: 15px;
+  accent-color: #a8d8a8;
 }
 
 .legende {
