@@ -144,12 +144,17 @@ export default function MapView({ lag }: MapViewProps) {
 
   type PopupInnhold =
     | { type: "dyr"; art: string; antall: number; dato: string | null }
-    | { type: "nasjonalpark"; navn: string; areal: number }
-    | { type: "verneomrade"; navn: string; vernetype: string }
-    | { type: "tursti"; navn: string; lengde: number }
-    | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
-    | { type: "fjelltopp"; navn: string; høyde: number }
-    | { type: "badestrand"; navn: string; kommune: string };
+    | { type: "nasjonalpark"; navn?: string | null; areal?: number | null }
+    | { type: "verneomrade"; navn?: string | null; vernetype?: string | null }
+    | { type: "tursti"; navn?: string | null; lengde?: number | null }
+    | {
+        type: "hytte";
+        navn?: string | null;
+        hyttetype?: string | null;
+        høyde?: number | null;
+      }
+    | { type: "fjelltopp"; navn?: string | null; høyde?: number | null }
+    | { type: "badestrand"; navn?: string | null; kommune?: string | null };
 
   const [popup, setPopup] = useState<{
     innhold: PopupInnhold;
@@ -333,14 +338,18 @@ export default function MapView({ lag }: MapViewProps) {
       if (!enkelt) return;
 
       const pos = { x: e.pixel[0], y: e.pixel[1] };
+      const tekst = (verdi: unknown): string | null =>
+        typeof verdi === "string" && verdi.trim() ? verdi.trim() : null;
+      const tall = (verdi: unknown): number | null =>
+        typeof verdi === "number" && Number.isFinite(verdi) ? verdi : null;
 
       // Nasjonalparker — har areal_km2
       if (enkelt.get("areal_km2") !== undefined) {
         setPopup({
           innhold: {
             type: "nasjonalpark",
-            navn: enkelt.get("navn") ?? "Ukjent nasjonalpark",
-            areal: enkelt.get("areal_km2") ?? 0,
+            navn: tekst(enkelt.get("navn")),
+            areal: tall(enkelt.get("areal_km2")),
           },
           posisjon: pos,
         });
@@ -352,8 +361,8 @@ export default function MapView({ lag }: MapViewProps) {
         setPopup({
           innhold: {
             type: "verneomrade",
-            navn: enkelt.get("navn") ?? "Ukjent verneområde",
-            vernetype: enkelt.get("vernetype") ?? "",
+            navn: tekst(enkelt.get("navn")),
+            vernetype: tekst(enkelt.get("vernetype")),
           },
           posisjon: pos,
         });
@@ -365,8 +374,8 @@ export default function MapView({ lag }: MapViewProps) {
         setPopup({
           innhold: {
             type: "tursti",
-            navn: enkelt.get("navn") ?? "Ukjent tursti",
-            lengde: enkelt.get("lengde_km") ?? 0,
+            navn: tekst(enkelt.get("navn")),
+            lengde: tall(enkelt.get("lengde_km")),
           },
           posisjon: pos,
         });
@@ -378,9 +387,9 @@ export default function MapView({ lag }: MapViewProps) {
         setPopup({
           innhold: {
             type: "hytte",
-            navn: enkelt.get("navn") ?? "Ukjent hytte",
-            hyttetype: enkelt.get("type") ?? "",
-            høyde: enkelt.get("høyde_moh") ?? 0,
+            navn: tekst(enkelt.get("navn")),
+            hyttetype: tekst(enkelt.get("type")),
+            høyde: tall(enkelt.get("høyde_moh")),
           },
           posisjon: pos,
         });
@@ -392,8 +401,8 @@ export default function MapView({ lag }: MapViewProps) {
         setPopup({
           innhold: {
             type: "fjelltopp",
-            navn: enkelt.get("navn") ?? "Ukjent fjelltopp",
-            høyde: enkelt.get("høyde_moh") ?? 0,
+            navn: tekst(enkelt.get("navn")),
+            høyde: tall(enkelt.get("høyde_moh")),
           },
           posisjon: pos,
         });
@@ -405,8 +414,8 @@ export default function MapView({ lag }: MapViewProps) {
         setPopup({
           innhold: {
             type: "badestrand",
-            navn: enkelt.get("navn") ?? "Ukjent strand",
-            kommune: enkelt.get("kommune") ?? "",
+            navn: tekst(enkelt.get("navn")),
+            kommune: tekst(enkelt.get("kommune")),
           },
           posisjon: pos,
         });

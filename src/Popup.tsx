@@ -1,11 +1,16 @@
 type PopupInnhold =
   | { type: "dyr"; art: string; antall: number; dato: string | null }
-  | { type: "nasjonalpark"; navn: string; areal: number }
-  | { type: "verneomrade"; navn: string; vernetype: string }
-  | { type: "tursti"; navn: string; lengde: number }
-  | { type: "hytte"; navn: string; hyttetype: string; høyde: number }
-  | { type: "fjelltopp"; navn: string; høyde: number }
-  | { type: "badestrand"; navn: string; kommune: string };
+  | { type: "nasjonalpark"; navn?: string | null; areal?: number | null }
+  | { type: "verneomrade"; navn?: string | null; vernetype?: string | null }
+  | { type: "tursti"; navn?: string | null; lengde?: number | null }
+  | {
+      type: "hytte";
+      navn?: string | null;
+      hyttetype?: string | null;
+      høyde?: number | null;
+    }
+  | { type: "fjelltopp"; navn?: string | null; høyde?: number | null }
+  | { type: "badestrand"; navn?: string | null; kommune?: string | null };
 
 interface PopupProps {
   innhold: PopupInnhold | null;
@@ -15,6 +20,22 @@ interface PopupProps {
 
 export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
   if (!innhold || !posisjon) return null;
+
+  const visTekst = (verdi: unknown, fallback = "Ikke oppgitt"): string => {
+    if (typeof verdi === "string" && verdi.trim().length > 0) return verdi.trim();
+    return fallback;
+  };
+
+  const visTall = (
+    verdi: unknown,
+    unit: string,
+    fallback = "Ikke oppgitt",
+  ): string => {
+    if (typeof verdi === "number" && Number.isFinite(verdi)) {
+      return `${verdi.toLocaleString("no")} ${unit}`;
+    }
+    return fallback;
+  };
 
   return (
     <div
@@ -52,27 +73,33 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       {innhold.type === "nasjonalpark" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            🏔️ {innhold.navn}
+            🏔️ {visTekst(innhold.navn, "Ukjent nasjonalpark")}
           </p>
-          <p style={{ margin: 0, color: "#555" }}>{innhold.areal.toLocaleString("no")} km²</p>
+          <p style={{ margin: 0, color: "#555" }}>
+            {visTall(innhold.areal, "km²")}
+          </p>
         </>
       )}
 
       {innhold.type === "verneomrade" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            🌿 {innhold.navn}
+            🌿 {visTekst(innhold.navn, "Ukjent verneområde")}
           </p>
-          <p style={{ margin: 0, color: "#555" }}>{innhold.vernetype}</p>
+          <p style={{ margin: 0, color: "#555" }}>
+            {visTekst(innhold.vernetype)}
+          </p>
         </>
       )}
 
       {innhold.type === "tursti" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            🥾 {innhold.navn}
+            🥾 {visTekst(innhold.navn, "Ukjent tursti")}
           </p>
-          <p style={{ margin: 0, color: "#555" }}>{innhold.lengde} km</p>
+          <p style={{ margin: 0, color: "#555" }}>
+            {visTall(innhold.lengde, "km")}
+          </p>
         </>
       )}
 
@@ -95,11 +122,13 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       {innhold.type === "hytte" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            🏠 {innhold.navn}
+            🏠 {visTekst(innhold.navn, "Ukjent hytte")}
           </p>
-          <p style={{ margin: "0 0 2px", color: "#555" }}>{innhold.hyttetype}</p>
+          <p style={{ margin: "0 0 2px", color: "#555" }}>
+            {visTekst(innhold.hyttetype, "Hyttetype ikke oppgitt")}
+          </p>
           <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
-            {innhold.høyde} moh
+            {visTall(innhold.høyde, "moh")}
           </p>
         </>
       )}
@@ -107,18 +136,22 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       {innhold.type === "fjelltopp" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            ⛰️ {innhold.navn}
+            ⛰️ {visTekst(innhold.navn, "Ukjent fjelltopp")}
           </p>
-          <p style={{ margin: 0, color: "#555" }}>{innhold.høyde} moh</p>
+          <p style={{ margin: 0, color: "#555" }}>
+            {visTall(innhold.høyde, "moh")}
+          </p>
         </>
       )}
 
       {innhold.type === "badestrand" && (
         <>
           <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-            🏖️ {innhold.navn}
+            🏖️ {visTekst(innhold.navn, "Ukjent badestrand")}
           </p>
-          <p style={{ margin: 0, color: "#555" }}>{innhold.kommune}</p>
+          <p style={{ margin: 0, color: "#555" }}>
+            {visTekst(innhold.kommune, "Kommune ikke oppgitt")}
+          </p>
         </>
       )}
     </div>
