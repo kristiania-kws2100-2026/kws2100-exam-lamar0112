@@ -64,6 +64,21 @@ Lamar hadde backend, GBIF-integrasjon, clustering og deploy. Asharib tok seg av 
 
 ---
 
+## Turstier
+
+Kartet viser 11 kjente norske turstier som linjegeometri i GeoJSON. Hvert tursti-objekt har fire egenskaper:
+
+| Felt | Eksempel |
+|------|---------|
+| `navn` | Besseggen |
+| `lengde_km` | 22 |
+| `vanskelighetsgrad` | lett / middels / krevende |
+| `sesong` | sommer / helårs |
+
+Klikker du på en tursti på kartet, viser popupen lengde, vanskelighetsgrad og sesong. Hover viser navnet i en hvit boble. Lag-stilen er en oransje stiplet linje (fargen skiller seg fra naturvernlag slik at det er lett å se hva som er hva).
+
+---
+
 ## Datakilder
 
 - [GBIF](https://www.gbif.org) — dyreobservasjoner (CC BY 4.0)
