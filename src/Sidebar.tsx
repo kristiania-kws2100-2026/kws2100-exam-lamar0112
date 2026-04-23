@@ -34,90 +34,92 @@ export default function Sidebar({
 
   return (
     <div className="sidebar">
-      <h1>🌲 Norsk Natur- og Friluftskart</h1>
-      <p className="undertittel">Dyreliv og friluftsliv i Norge</p>
-
-      <hr />
-
-      <h3>Kartlag</h3>
-      {lag.map((l) => (
-        <label key={l.id} className="lag-rad">
-          <input
-            type="checkbox"
-            checked={l.synlig}
-            onChange={() => toggleLag(l.id)}
-          />
-          <span>
-            {l.ikon} {l.navn}
-          </span>
-        </label>
-      ))}
-
-      <hr />
-
-      <h3>Fjelltopper i kartet</h3>
-      {harTilbake && (
-        <button className="tilbake-knapp" onClick={onGaTilbake}>
-          ← Tilbake til forrige visning
-        </button>
-      )}
-      {synligeFjelltopper.length === 0 ? (
-        <p className="ingen-topper">Zoom inn for å se fjelltopper</p>
-      ) : (
-        <ul className="topp-liste">
-          {synligeFjelltopper.map((topp) => (
-            <li
-              key={`${topp.koordinater[0]}-${topp.koordinater[1]}`}
-              className="topp-rad"
-              onClick={() => onZoomTilTopp(topp.koordinater)}
-            >
-              <span className="topp-navn">⛰️ {topp.navn}</span>
-              <span className="topp-høyde">{topp.høyde} moh</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <hr />
-
-      <h3>Forklaring</h3>
-      <div className="legende">
-        <span className="legende-boks" style={{ background: "#1b4332", border: "1px solid #1b4332" }} />
-        Nasjonalpark (polygon)
-      </div>
-      <div className="legende">
-        <span className="legende-boks" style={{ background: "rgba(45,106,79,0.4)", border: "1px solid #2d6a4f" }} />
-        Verneområde (polygon)
-      </div>
-      <div className="legende">
-        <span className="legende-linje" style={{ background: "#e76f00" }} />
-        Tursti (linje)
-      </div>
-      <div className="legende">
-        <span className="prikk" style={{ background: "#2f2f2f" }} /> DNT-hytte (punkt)
-      </div>
-      <div className="legende">
-        <span className="prikk" style={{ background: "#4b4b4b" }} /> Fjelltopp (punkt)
-      </div>
-      <div className="legende">
-        <span className="prikk" style={{ background: "#777" }} /> Badestrand (punkt)
-      </div>
-      <div className="legende">
-        <span className="prikk rod" /> 1 dyreobs.
-      </div>
-      <div className="legende">
-        <span className="prikk oransje" /> 2–9 dyreobs.
-      </div>
-      <div className="legende">
-        <span className="prikk gronn" /> 10+ dyreobs.
+      <div className="sidebar-header">
+        <h1>🌲 Norsk Natur- og Friluftskart</h1>
+        <p className="undertittel">Dyreliv og friluftsliv i Norge</p>
       </div>
 
-      <hr />
+      <div className="sidebar-section">
+        <h3>Kartlag</h3>
+        {lag.map((l) => (
+          <label key={l.id} className="lag-rad">
+            <input
+              type="checkbox"
+              checked={l.synlig}
+              onChange={() => toggleLag(l.id)}
+            />
+            <span>
+              {l.ikon} {l.navn}
+            </span>
+          </label>
+        ))}
+      </div>
 
-      <p className="info">
-        Data: GBIF, Geonorge, Kartverket N50.
-        Klikk på et objekt for å se info.
-      </p>
+      <div className="sidebar-section">
+        <h3>Fjelltopper i kartet</h3>
+        {harTilbake && (
+          <button className="tilbake-knapp" onClick={onGaTilbake}>
+            ← Tilbake til forrige visning
+          </button>
+        )}
+        {synligeFjelltopper.length === 0 ? (
+          <p className="ingen-topper">Zoom inn for å se fjelltopper</p>
+        ) : (
+          <ul className="topp-liste">
+            {synligeFjelltopper.map((topp) => (
+              <li
+                key={`${topp.koordinater[0]}-${topp.koordinater[1]}`}
+                className="topp-rad"
+                onClick={() => onZoomTilTopp(topp.koordinater)}
+              >
+                <span className="topp-navn">⛰️ {topp.navn}</span>
+                <span className="topp-høyde">{topp.høyde} moh</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="sidebar-section">
+        <h3>Forklaring</h3>
+        <div className="legende">
+          <span className="legende-boks" style={{ background: "rgba(27,67,50,0.6)", border: "2px solid #1b4332" }} />
+          Nasjonalpark
+        </div>
+        <div className="legende">
+          <span className="legende-boks" style={{ background: "rgba(45,106,79,0.35)", border: "1.5px solid #2d6a4f" }} />
+          Verneområde
+        </div>
+        <div className="legende">
+          <span className="legende-linje" style={{ background: "#e76f00" }} />
+          Tursti
+        </div>
+        <div className="legende">
+          <span>🏠</span> DNT-hytte
+        </div>
+        <div className="legende">
+          <span>⛰️</span> Fjelltopp
+        </div>
+        <div className="legende">
+          <span>🏖️</span> Badestrand
+        </div>
+        <div className="legende">
+          <span className="prikk rod" /> 1 dyreobs.
+        </div>
+        <div className="legende">
+          <span className="prikk oransje" /> 2–9 dyreobs.
+        </div>
+        <div className="legende">
+          <span className="prikk gronn" /> 10+ dyreobs.
+        </div>
+      </div>
+
+      <div className="sidebar-section">
+        <p className="info">
+          Data: GBIF, Geonorge, Kartverket N50, Miljødirektoratet.<br />
+          Klikk på et objekt for å se detaljer.
+        </p>
+      </div>
     </div>
   );
 }
