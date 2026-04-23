@@ -22,7 +22,7 @@
 
 ---
 
-## STATUS PER 2026-04-23 (oppdatert etter Asharib sin siste økt)
+## STATUS PER 2026-04-23 (oppdatert etter åpne PR-er fra Asharib og Samir)
 
 ### ✅ Lamar — ferdig (main)
 - Grunnkart med OSM
@@ -47,8 +47,9 @@ Branch: `lamar/asharib-naturlag`
 - Små stilforbedringer for naturlag (kontrast, fill og linjebredde) ✅
 - Tydeligere legend i sidebar for naturlag (polygon/linje-symboler) ✅
 - `README.md` lagt til og oppdatert med prosjektbeskrivelse, datakilder og refleksjon ✅
+- PR: **#4** "Forbedret robusthet og visning for naturlag" (åpen)
 
-### 🔄 Samir — oppdatert branch funnet, må fortsatt sammenslås kontrollert
+### 🔄 Samir — punktlag klart i egen PR, må sammenslås kontrollert
 - Brancher funnet: `lamar/samir-friluft` og `samir/punktlag-kvalitet`
 - `public/data/hytter.geojson` — DNT-hytter (Point, props: navn, type, høyde_moh)
 - `public/data/fjelltopper.geojson` — fjelltopper (Point, props: navn, høyde_moh)
@@ -58,6 +59,7 @@ Branch: `lamar/asharib-naturlag`
 - Klikk → popup med relevant info
 - Verifisert mot Git: punktfiler finnes, og `samir/punktlag-kvalitet` endrer hovedsakelig `src/MapView.tsx`, `src/Popup.tsx`, `src/Sidebar.tsx`.
 - Merk: branchen sin `CLAUDE.md` sier at alt er merget i `main`, men det stemmer ikke fullt ut med faktisk branch-diff. Bruk git-diff som fasit.
+- PR: **#3** "Punktlag: mer robust popup og tydeligere forklaring i kartet" (åpen)
 
 ---
 
@@ -65,49 +67,15 @@ Branch: `lamar/asharib-naturlag`
 
 **Gjøres på Lamar sin PC — én ting om gangen med naturlige commits:**
 
-### 1. Merge/oppdatere Asharib-arbeid
-```bash
-git pull origin main   # etter merge på GitHub
-```
+### 1. Merge PR #4 (Asharib) og PR #3 (Samir) i riktig rekkefølge
+- Merge PR #4 først (robust naturlag + README + statusoppdatering)
+- Merge PR #3 etterpå, med konfliktløsning i `MapView`, `Popup`, `Sidebar`
+- Behold robust felthåndtering/fallback fra Asharib der kode overlapper
 
-### 2. Samir sin branch (lamar/samir-friluft)
-Punktdata ligger på branch og skal merges kontrollert senere.
-Behold Asharib sin robuste hover/popup-løsning ved sammenslåing.
-
-### 3. Utvide Popup.tsx — generisk (VIKTIG for A)
-Popup.tsx håndterer i dag bare dyreobservasjoner `{ art, antall, dato }`.
-Utvid til å vise info for alle lag:
-- Nasjonalpark: navn + areal_km2
-- Tursti: navn + lengde_km
-- Hytte: navn + type
-- Fjelltopp: navn + høyde_moh
-- Badestrand: navn + kommune
-
-Hint — nytt popup-state i MapView.tsx:
-```ts
-type PopupInnhold =
-  | { type: "dyr"; art: string; antall: number; dato: string | null }
-  | { type: "naturlag"; navn: string; detalj: string };
-```
-
-### 4. Klikk på naturlag i MapView.tsx
-I `map.on("click", ...)` — sjekk om feature er fra naturlag og vis popup:
-```ts
-const navn = enkelt.get("navn");
-const areal = enkelt.get("areal_km2");
-const km = enkelt.get("lengde_km");
-if (navn) {
-  setPopup({ type: "naturlag", navn, detalj: areal ? `${areal} km²` : km ? `${km} km` : "" });
-}
-```
-
-### 5. Sidebar.tsx — full legend
-Legg til fargesymboler for alle lag under "Forklaring":
-```tsx
-<div className="legende"><span style={{background:"#1b4332", width:14, height:14, display:"inline-block", marginRight:6}}/> Nasjonalpark</div>
-<div className="legende"><span style={{background:"rgba(45,106,79,0.5)", ...}}/> Verneområde</div>
-// osv
-```
+### 2. Verifisering etter merge
+- `npm run typecheck`
+- `npm run build`
+- Rask manuell test: hover + klikk-popup + lagtoggle på alle lag
 
 ### 6. Kartverket topo-kart som alternativt basiskart
 ```ts
@@ -123,12 +91,9 @@ const kartverketLag = new TileLayer({
 ```
 Legg til i App.tsx lag-liste: `{ id: "kartverket", navn: "Kartverket topo", ikon: "🗺️", synlig: false }`
 
-### 7. README.md
-`README.md` er nå lagt til i repo med:
-- prosjektfortelling og gruppekontekst
-- datakilder
-- lokal kjøring (`dev`, `server`, `typecheck`, `build`)
-- teknisk stack og kort refleksjon
+### 3. A-tillegg som gjenstår
+- Kartverket topo som alternativt basiskart
+- Eventuelt overview map / projeksjon dersom tid
 
 ---
 
@@ -138,7 +103,7 @@ Legg til i App.tsx lag-liste: `{ id: "kartverket", navn: "Kartverket topo", ikon
 - [x] `useRef` + `useEffect` for kart-init
 - [x] Polygon-geometri
 - [x] Linje-geometri
-- [ ] Punkt-geometri (Samir)
+- [x] Punkt-geometri (Samir i PR #3)
 - [x] Hover-stil
 - [x] Klikk → vis info (dyr)
 - [x] Klikk → vis info naturlag (Asharib)
@@ -148,19 +113,13 @@ Legg til i App.tsx lag-liste: `{ id: "kartverket", navn: "Kartverket topo", ikon
 - [ ] Kartverket WMTS (Lamar A-tillegg)
 
 ## Nåværende lokale filer som ikke er pushet ennå
-- Endret: `src/MapView.tsx`
-- Endret: `src/Popup.tsx`
-- Endret: `src/Sidebar.tsx`
-- Endret: `src/sidebar.css`
-- Endret: `CLAUDE.md`
-- Ny: `README.md`
-- Untracked: `slim.mjs` (må avklares før commit)
+- Untracked: `slim.mjs` (lokalt hjelpeverktøy, ikke nødvendig for app/commit)
 
 ## Neste steg (anbefalt rekkefølge)
-1. Fullfør og push Asharib-branch med robuste naturlag-endringer + README.
-2. Be Samir åpne PR fra `samir/punktlag-kvalitet` (eller `lamar/samir-friluft`) med kort testplan.
-3. Lamar gjør kontrollert merge, løser konflikter i `MapView`, `Popup`, `Sidebar` uten å miste Asharib-robusthet.
-4. Kjør `npm run typecheck` og `npm run build` etter sammenslåing.
+1. Lamar merger PR #4 (Asharib), deretter PR #3 (Samir).
+2. Løs konflikter i `MapView`, `Popup`, `Sidebar` med fokus på å bevare robust felthåndtering.
+3. Kjør `npm run typecheck` og `npm run build`.
+4. Gjennomfør siste manuell test av hover/popup/lag.
 
 ## Mappestruktur
 ```
