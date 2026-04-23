@@ -1,5 +1,6 @@
 import { type Dispatch, type SetStateAction } from "react";
 import "./sidebar.css";
+import type { FjelltoppInfo } from "./types";
 
 interface Lag {
   id: string;
@@ -11,9 +12,20 @@ interface Lag {
 interface SidebarProps {
   lag: Lag[];
   setLag: Dispatch<SetStateAction<Lag[]>>;
+  synligeFjelltopper: FjelltoppInfo[];
+  onZoomTilTopp: (koordinater: [number, number]) => void;
+  onGaTilbake: () => void;
+  harTilbake: boolean;
 }
 
-export default function Sidebar({ lag, setLag }: SidebarProps) {
+export default function Sidebar({
+  lag,
+  setLag,
+  synligeFjelltopper,
+  onZoomTilTopp,
+  onGaTilbake,
+  harTilbake,
+}: SidebarProps) {
   function toggleLag(id: string) {
     setLag((forrige) =>
       forrige.map((l) => (l.id === id ? { ...l, synlig: !l.synlig } : l)),
@@ -40,6 +52,31 @@ export default function Sidebar({ lag, setLag }: SidebarProps) {
           </span>
         </label>
       ))}
+
+      <hr />
+
+      <h3>Fjelltopper i kartet</h3>
+      {harTilbake && (
+        <button className="tilbake-knapp" onClick={onGaTilbake}>
+          ← Tilbake til forrige visning
+        </button>
+      )}
+      {synligeFjelltopper.length === 0 ? (
+        <p className="ingen-topper">Zoom inn for å se fjelltopper</p>
+      ) : (
+        <ul className="topp-liste">
+          {synligeFjelltopper.map((topp) => (
+            <li
+              key={`${topp.koordinater[0]}-${topp.koordinater[1]}`}
+              className="topp-rad"
+              onClick={() => onZoomTilTopp(topp.koordinater)}
+            >
+              <span className="topp-navn">⛰️ {topp.navn}</span>
+              <span className="topp-høyde">{topp.høyde} moh</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <hr />
 

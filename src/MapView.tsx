@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Popup from "./Popup";
 import "ol/ol.css";
+import type { FjelltoppInfo, ZoomMal } from "./types";
+import Point from "ol/geom/Point";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -38,6 +40,8 @@ interface Lag {
 
 interface MapViewProps {
   lag: Lag[];
+  onSynligeFjelltopperEndret?: (topper: FjelltoppInfo[]) => void;
+  zoomMal?: ZoomMal | null;
 }
 
 function clusterStil(feature: FeatureLike): Style {
@@ -125,7 +129,7 @@ const badestranderHoverStil = new Style({
   text: new Text({ text: "🏖️", font: "22px sans-serif" }),
 });
 
-export default function MapView({ lag }: MapViewProps) {
+export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: MapViewProps) {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const clusterLagRef = useRef<VectorLayer | null>(null);
@@ -483,11 +487,56 @@ export default function MapView({ lag }: MapViewProps) {
       }
     });
 
+    // Oppdater listen over synlige fjelltopper når kartet flyttes eller data lastes
+    const oppdaterFjelltopper = () => {
+      if (!onSynligeFjelltopperEndret) return;
+      const size = map.getSize();
+      if (!size) return;
+      const extent = map.getView().calculateExtent(size);
+      const features = fjelltopperSource.getFeaturesInExtent(extent);
+      const topper: FjelltoppInfo[] = features
+        .map((f) => {
+          const geom = f.getGeometry();
+          if (!(geom instanceof Point)) return null;
+          const [lng, lat] = geom.getCoordinates();
+          return {
+            navn: (f.get("navn") as string) || "Ukjent",
+            høyde: (f.get("høyde_moh") as number) || 0,
+            koordinater: [lng, lat] as [number, number],
+          };
+        })
+        .filter((t): t is FjelltoppInfo => t !== null)
+        .sort((a, b) => b.høyde - a.høyde);
+      onSynligeFjelltopperEndret(topper);
+    };
+
+    map.on("moveend", oppdaterFjelltopper);
+    fjelltopperSource.on("featuresloadend", oppdaterFjelltopper);
+
     return () => {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource, badestranderSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource, badestranderSource, onSynligeFjelltopperEndret]);
+
+  // Zoom-animasjon når bruker klikker en fjelltopp i sidepanelet
+  useEffect(() => {
+    if (!zoomMal || !mapRef.current) return;
+    const view = mapRef.current.getView();
+
+    if (!zoomMal.erTilbake) {
+      sessionStorage.setItem(
+        "forrigeVisning",
+        JSON.stringify({ senter: view.getCenter(), zoom: view.getZoom() }),
+      );
+    }
+
+    view.animate({
+      center: zoomMal.koordinater,
+      zoom: zoomMal.zoom,
+      duration: 800,
+    });
+  }, [zoomMal]);
 
   useEffect(() => {
     for (const l of lag) {
