@@ -2,9 +2,11 @@
 
 Gruppeeksamen i KWS2100 Kartbaserte websystemer, Høyskolen Kristiania 2026.
 
-**Gruppe:** Lamar (lasa020), Asharib (asha023), Samir
+**Gruppe:** Lamar (lasa020), Asharib (asha023), Samir (sama)
 
 **Live:** https://kristiania-kws2100-2026.github.io/kws2100-exam-lamar0112/
+
+**Backend:** https://naturkart-server.onrender.com
 
 ---
 
@@ -14,7 +16,7 @@ Tenk deg at du planlegger en tur i norsk natur. Du vil vite: Hvor kan jeg gå? E
 
 Norsk Natur- og Friluftskart samler denne informasjonen på ett sted. Kartet er rettet mot turgåere, naturinteresserte og alle som vil utforske norsk natur — fra nasjonalparkene i nord til badestrendene langs kysten.
 
-Applikasjonen viser 5 000+ dyreobservasjoner fra Artsdatabanken, alle norske nasjonalparker og vernede naturområder, merkede turstier, DNT-hytter, fjelltopper og populære badestrander. Et klikk på et objekt gir deg navn, type og relevant info. Oversiktskartet nede til høyre viser alltid hvor i Norge du befinner deg.
+Applikasjonen viser 5 000+ dyreobservasjoner fra Artsdatabanken, alle norske nasjonalparker og vernede naturområder, merkede turstier, DNT-hytter, fjelltopper og populære badestrander. Et klikk på et objekt gir deg navn, type og relevant info.
 
 ---
 
@@ -23,21 +25,41 @@ Applikasjonen viser 5 000+ dyreobservasjoner fra Artsdatabanken, alle norske nas
 | Lag | Type | Kilde |
 |-----|------|-------|
 | Dyreobservasjoner (cluster) | Punkt | GBIF / Artsdatabanken |
-| Nasjonalparker | Polygon | Geonorge / Miljødirektoratet |
-| Verneområder | Polygon | Geonorge / Miljødirektoratet |
-| Turstier | Linje | Geonorge / Kartverket |
+| Detaljerte observasjoner | Vector Tile (MVT) | Backend / PostGIS |
+| Nasjonalparker | Polygon | Miljødirektoratets API |
+| Verneområder | Polygon | Miljødirektoratets API |
+| Turstier | Linje | Kartverket / egne data |
 | DNT-hytter | Punkt | Kartverket N50 |
 | Fjelltopper | Punkt | Kartverket N50 |
 | Badestrander | Punkt | Geonorge |
-| Kartverket topo | Flisekart | Kartverket |
+| Kartverket topo | Flisekart | Kartverket WMTS |
 
-Alle lag kan slås av og på i sidepanelet. Dyreobservasjoner vises som cluster ved lavt zoom og som individuelle punkter ved høyt zoom (via Vector Tile Layer fra backend).
+Alle lag kan slås av og på i sidepanelet.
+
+---
+
+## Funksjonalitet
+
+### Sidepanel-synkronisering med kartutsnitt
+Sidepanelet viser en live liste over fjelltopper som er synlige i det gjeldende kartutsnittet, sortert etter høyde. Klikker du på en fjelltopp i listen, zoomer kartet automatisk inn på den valgte toppen med en animert overgang. Forrige kartvisning (senter og zoom) lagres i `sessionStorage`, slik at en "Tilbake til forrige visning"-knapp dukker opp og lar deg enkelt navigere tilbake. Dette er en funksjon som ikke ble gjennomgått i forelesningene.
+
+### Cluster-lag + Vector Tile Layer
+Dyreobservasjoner vises som et cluster-lag ved lavt zoom og som individuelle punkter via en Vector Tile Layer (MVT) fra backend ved høyt zoom (zoom ≥ 12). Cluster-størrelse og farge reflekterer antall observasjoner i gruppen.
+
+### Hover og klikk-popup
+Alle vektorlag har hover-stil. Klikk på et objekt åpner en popup med navn, type og relevant informasjon (areal for nasjonalparker, vernetype for verneområder, lengde for turstier, høyde for fjelltopper og hytter, kommune for badestrander).
+
+### Oversiktskart
+OverviewMap i nedre venstre hjørne viser alltid din posisjon i Norge.
+
+### To basiskart
+Veksle mellom OpenStreetMap og Kartverket topografisk kart via lagkontrollen.
 
 ---
 
 ## Teknisk
 
-- **Frontend:** React + TypeScript + Vite + OpenLayers v10
+- **Frontend:** React 19 + TypeScript + Vite 7 + OpenLayers v10
 - **Backend:** Hono + PostgreSQL/PostGIS på Render.com
 - **Deploy:** GitHub Pages (frontend) + Render.com (backend)
 
@@ -50,17 +72,25 @@ Alle lag kan slås av og på i sidepanelet. Dyreobservasjoner vises som cluster 
 - Hover-stil på alle 6 vektorlag
 - Klikk → popup med typebasert info (generisk diskriminert union i TypeScript)
 - VectorTileLayer (MVT) via backend — avansert feature ved zoom 12+
-- Cluster-lag for 5 000+ dyreobservasjoner
-- Oversiktskart (OverviewMap control) — viser posisjon i Norge
-- To basiskart: OSM (standard) + Kartverket topografisk
+- Cluster-lag for 5 000+ dyreobservasjoner med størrelsesbasert stil
+- OverviewMap control
+- To basiskart: OSM + Kartverket topografisk (WMTS)
+
+### Utenfor pensum (for A)
+
+- **Hono + PostGIS backend** på Render.com med Vector Tile-endepunkt (`ST_AsMVT`)
+- **Sidepanel-synkronisering** — live liste over fjelltopper i kartutsnittet, zoom til topp, `sessionStorage`-basert navigasjon tilbake
+- **Ekte polygon-data** fra Miljødirektoratets REST API (nasjonalparker og verneområder)
 
 ### Arbeidsfordeling
 
-Vi var alle tre til stede alle dagene og jobbet mye rundt samme skjerm. Lamar eier repoet og mergde alle PR-er, men de lange kveldene satt vi som regel alle tre inne i koden, særlig da grunnstrukturen ble bygd den første kvelden.
+Vi jobbet mye rundt samme skjerm og var alle tre til stede gjennom de to eksamendagene. Lamar eier repoet og mergde alle PR-er.
 
-Lamar hadde backend, GBIF-integrasjon, clustering og deploy. Asharib tok seg av naturlagene: nasjonalparker og verneområder som polygoner, turstier som linje, med hover og tooltip. Samir hadde punktlagene: hytter, fjelltopper og badestrander, pluss GeoJSON-dataene for disse.
+- **Lamar:** Backend (Hono, PostGIS, GBIF-paginering), clustering, Vector Tiles, GitHub Pages deploy, OverviewMap, Kartverket basiskart, popup-system, prosjektstruktur
+- **Asharib:** Naturlag (nasjonalparker og verneomrader som polygoner, turstier som linjestrenger), hover-stiler, `useGeographic()` + `useMemo`
+- **Samir:** Punktlag (hytter, fjelltopper, badestrander), GeoJSON-data, popup-forbedringer, sidepanel-synkronisering med sessionStorage, dataforbedring fra Miljødirektoratets API
 
-21. april kveld klonet vi repoet på Asharibs PC og bygde prosjektet opp derfra. En del commits fra den perioden ligger under Asharibs og Lamars navn. Mer detaljer i [CONTRIBUTIONS.md](CONTRIBUTIONS.md).
+Mer detaljer i [CONTRIBUTIONS.md](CONTRIBUTIONS.md).
 
 ---
 
@@ -82,5 +112,6 @@ Klikker du på en tursti på kartet, viser popupen lengde, vanskelighetsgrad og 
 ## Datakilder
 
 - [GBIF](https://www.gbif.org) — dyreobservasjoner (CC BY 4.0)
-- [Geonorge](https://www.geonorge.no) — nasjonalparker, verneområder, turstier, badestrander (CC BY 4.0)
+- [Miljødirektoratets kartapplikasjon](https://kart.miljodirektoratet.no) — nasjonalparker, verneområder (CC BY 4.0)
+- [Geonorge](https://www.geonorge.no) — turstier, badestrander (CC BY 4.0)
 - [Kartverket N50](https://www.kartverket.no) — hytter, fjelltopper, topokart (CC BY 4.0)

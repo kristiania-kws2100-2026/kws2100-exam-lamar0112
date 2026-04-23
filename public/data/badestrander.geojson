@@ -60,6 +60,21 @@
       "type": "Feature",
       "geometry": { "type": "Point", "coordinates": [10.5847, 59.9581] },
       "properties": { "navn": "Paradisbukta", "kommune": "Oslo" }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Huk", "kommune": "Oslo" },
+      "geometry": { "type": "Point", "coordinates": [10.6744, 59.8978] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Tjøme", "kommune": "Færder" },
+      "geometry": { "type": "Point", "coordinates": [10.4022, 59.1045] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Borre strand", "kommune": "Horten" },
+      "geometry": { "type": "Point", "coordinates": [10.4534, 59.3821] }
     }
   ]
 }

@@ -94,6 +94,7 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
         <>
           <p className="popup-tittel">⛰️ {visTekst(innhold.navn, "Ukjent fjelltopp")}</p>
           <p className="popup-info">{visTall(innhold.høyde, "moh")}</p>
+          <p className="popup-detalj">Norges ikoniske fjelltopper</p>
           <span className="popup-badge" style={{ background: "#eceff1", color: "#37474f" }}>Fjelltopp</span>
         </>
       )}

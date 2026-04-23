@@ -1,78 +1,165 @@
 .sidebar {
-  width: 220px;
-  min-width: 220px;
-  background: #1e3a2f;
-  color: #eee;
-  padding: 16px;
+  width: 260px;
+  min-width: 260px;
+  background: #1a2f22;
+  color: #e8f0e8;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
 }
 
-.sidebar h1 {
-  font-size: 18px;
-  margin: 0;
+.sidebar-header {
+  background: #0f1f15;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #2a4535;
+}
+
+.sidebar-header h1 {
+  font-size: 16px;
+  margin: 0 0 4px;
   color: #a8d8a8;
-}
-
-.sidebar h3 {
-  font-size: 13px;
-  margin: 4px 0 2px;
-  color: #8bc98b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.sidebar hr {
-  border: none;
-  border-top: 1px solid #2e5040;
-  margin: 4px 0;
+  font-weight: 700;
+  letter-spacing: 0.2px;
 }
 
 .undertittel {
-  font-size: 12px;
-  color: #7aaa7a;
+  font-size: 11px;
+  color: #6a9a6a;
   margin: 0;
+}
+
+.sidebar-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid #243a2c;
+}
+
+.sidebar-section h3 {
+  font-size: 10px;
+  margin: 0 0 8px;
+  color: #6ab06a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .lag-rad {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 6px;
-  transition: background 0.15s;
+  padding: 5px 8px;
+  border-radius: 5px;
+  transition: background 0.12s;
   margin: 0 -8px;
+  user-select: none;
 }
 
 .lag-rad:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .lag-rad input {
   cursor: pointer;
-  width: 15px;
-  height: 15px;
-  accent-color: #a8d8a8;
+  width: 14px;
+  height: 14px;
+  accent-color: #7dc87d;
+  flex-shrink: 0;
 }
 
+/* Fjelltopper i kartet */
+.tilbake-knapp {
+  background: rgba(100, 180, 100, 0.12);
+  border: 1px solid #3a6a3a;
+  color: #8cc88c;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.12s;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tilbake-knapp:hover {
+  background: rgba(100, 180, 100, 0.22);
+}
+
+.ingen-topper {
+  font-size: 12px;
+  color: #4a7a4a;
+  margin: 0;
+  font-style: italic;
+  padding: 2px 0;
+}
+
+.topp-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topp-rad {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.12s;
+  margin: 1px -8px;
+  gap: 6px;
+}
+
+.topp-rad:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.topp-navn {
+  color: #d0e8d0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topp-høyde {
+  color: #6ab06a;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: rgba(106, 176, 106, 0.12);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Legende */
 .legende {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: #ccc;
+  font-size: 12px;
+  color: #aac8aa;
+  padding: 2px 0;
 }
 
 .prikk {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   display: inline-block;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
 }
 
 .rod { background: #dc3545; }
@@ -80,15 +167,15 @@
 .gronn { background: #228b22; }
 
 .legende-boks {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   display: inline-block;
   flex-shrink: 0;
   border-radius: 2px;
 }
 
 .legende-linje {
-  width: 18px;
+  width: 16px;
   height: 3px;
   display: inline-block;
   flex-shrink: 0;
@@ -96,8 +183,8 @@
 }
 
 .info {
-  font-size: 12px;
-  color: #999;
-  line-height: 1.5;
+  font-size: 11px;
+  color: #5a885a;
+  line-height: 1.6;
   margin: 0;
 }
