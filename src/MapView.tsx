@@ -35,6 +35,25 @@ interface MapViewProps {
   lag: Lag[];
 }
 
+type PopupInnhold =
+  | { type: "dyr"; art: string; antall: number; dato: string | null }
+  | { type: "naturlag"; navn: string; kategori: string; detalj: string };
+
+function tekstverdi(verdi: unknown, fallback: string): string {
+  if (typeof verdi !== "string") return fallback;
+  const trimmet = verdi.trim();
+  return trimmet.length > 0 ? trimmet : fallback;
+}
+
+function tallverdi(verdi: unknown): number | null {
+  if (typeof verdi === "number" && Number.isFinite(verdi)) return verdi;
+  if (typeof verdi === "string" && verdi.trim().length > 0) {
+    const parsed = Number(verdi);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 function clusterStil(feature: FeatureLike): Style {
   const features = feature.get("features") as FeatureLike[];
   const antall = features.length;
@@ -72,27 +91,27 @@ const vektorTilStil = new Style({
 });
 
 const nasjonalparkStil = new Style({
-  stroke: new Stroke({ color: "#1b4332", width: 2 }),
-  fill: new Fill({ color: "rgba(27, 67, 50, 0.25)" }),
+  stroke: new Stroke({ color: "#1b4332", width: 2.4 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.32)" }),
 });
 
 const turstiStil = new Style({
-  stroke: new Stroke({ color: "#e76f00", width: 2.5, lineDash: [6, 4] }),
+  stroke: new Stroke({ color: "#e76f00", width: 3, lineDash: [8, 4] }),
 });
 
 // Hover-stiler — lysere/tykkere versjon av hvert lag
 const nasjonalparkHoverStil = new Style({
-  stroke: new Stroke({ color: "#1b4332", width: 3 }),
-  fill: new Fill({ color: "rgba(27, 67, 50, 0.45)" }),
+  stroke: new Stroke({ color: "#1b4332", width: 3.2 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.5)" }),
 });
 
 const naturvernHoverStil = new Style({
-  stroke: new Stroke({ color: "#2d6a4f", width: 3 }),
-  fill: new Fill({ color: "rgba(45, 106, 79, 0.28)" }),
+  stroke: new Stroke({ color: "#2d6a4f", width: 3.2 }),
+  fill: new Fill({ color: "rgba(45, 106, 79, 0.35)" }),
 });
 
 const turstiHoverStil = new Style({
-  stroke: new Stroke({ color: "#e76f00", width: 4, lineDash: [6, 4] }),
+  stroke: new Stroke({ color: "#e76f00", width: 4.2, lineDash: [8, 4] }),
 });
 
 export default function MapView({ lag }: MapViewProps) {
@@ -105,6 +124,7 @@ export default function MapView({ lag }: MapViewProps) {
   const turstiLagRef = useRef<VectorLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
+  const hoverNavnRef = useRef<string | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
     navn: string;
     x: number;
@@ -112,7 +132,7 @@ export default function MapView({ lag }: MapViewProps) {
   } | null>(null);
 
   const [popup, setPopup] = useState<{
-    innhold: { art: string; antall: number; dato: string | null };
+    innhold: PopupInnhold;
     posisjon: { x: number; y: number };
   } | null>(null);
 
@@ -173,8 +193,8 @@ export default function MapView({ lag }: MapViewProps) {
     const naturvernLag = new VectorLayer({
       source: naturvernSource,
       style: new Style({
-        stroke: new Stroke({ color: "#2d6a4f", width: 2 }),
-        fill: new Fill({ color: "rgba(45, 106, 79, 0.1)" }),
+        stroke: new Stroke({ color: "#2d6a4f", width: 2.2 }),
+        fill: new Fill({ color: "rgba(45, 106, 79, 0.2)" }),
       }),
     });
 
@@ -224,25 +244,54 @@ export default function MapView({ lag }: MapViewProps) {
       const features = feature.get("features") as FeatureLike[] | undefined;
       const enkelt = features ? features[0] : feature;
 
-      if (!enkelt) return;
+      if (!enkelt) {
+        setPopup(null);
+        return;
+      }
+
+      const art = enkelt.get("art");
+      if (art !== undefined) {
+        setPopup({
+          innhold: {
+            type: "dyr",
+            art: tekstverdi(art, "Ukjent art"),
+            antall: tallverdi(enkelt.get("antall")) ?? 1,
+            dato:
+              typeof enkelt.get("observert_dato") === "string"
+                ? enkelt.get("observert_dato")
+                : null,
+          },
+          posisjon: { x: e.pixel[0], y: e.pixel[1] },
+        });
+        return;
+      }
+
+      const navn = tekstverdi(enkelt.get("navn"), "Uten navn");
+      const areal = tallverdi(enkelt.get("areal_km2"));
+      const lengde = tallverdi(enkelt.get("lengde_km"));
+      const vernetype = tekstverdi(enkelt.get("vernetype"), "Ikke oppgitt");
+
+      let kategori = "Naturlag";
+      let detalj = "Ingen ekstra felt tilgjengelig";
+
+      if (areal !== null) {
+        kategori = "Nasjonalpark";
+        detalj = `Areal: ${areal.toFixed(2)} km²`;
+      } else if (enkelt.get("vernetype") !== undefined) {
+        kategori = "Verneomrade";
+        detalj = `Vernetype: ${vernetype}`;
+      } else if (lengde !== null) {
+        kategori = "Tursti";
+        detalj = `Lengde: ${lengde.toFixed(2)} km`;
+      }
 
       setPopup({
-        innhold: {
-          art: enkelt.get("art") ?? "Ukjent art",
-          antall: enkelt.get("antall") ?? 1,
-          dato: enkelt.get("observert_dato") ?? null,
-        },
+        innhold: { type: "naturlag", navn, kategori, detalj },
         posisjon: { x: e.pixel[0], y: e.pixel[1] },
       });
     });
 
     map.on("pointermove", (e) => {
-      // Nullstill forrige hover-feature
-      if (hoverFeatureRef.current) {
-        hoverFeatureRef.current.setStyle(undefined);
-        hoverFeatureRef.current = null;
-      }
-
       const treff = map.forEachFeatureAtPixel(e.pixel, (f) => f, {
         layerFilter: (l) =>
           l === naturvernLag || l === nasjonalparkLag || l === turstiLag,
@@ -250,6 +299,11 @@ export default function MapView({ lag }: MapViewProps) {
 
       if (treff) {
         const feature = treff as Feature;
+
+        // Unngar unodvendig reset/repaint nar musepeker blir pa samme feature.
+        if (hoverFeatureRef.current && hoverFeatureRef.current !== feature) {
+          hoverFeatureRef.current.setStyle(undefined);
+        }
         hoverFeatureRef.current = feature;
 
         if (feature.get("areal_km2") !== undefined) {
@@ -260,12 +314,16 @@ export default function MapView({ lag }: MapViewProps) {
           feature.setStyle(turstiHoverStil);
         }
 
-        const navn = feature.get("navn") as string | undefined;
-        setHoverInfo(
-          navn ? { navn, x: e.pixel[0], y: e.pixel[1] } : null,
-        );
+        const navn = tekstverdi(feature.get("navn"), "Ukjent omrade");
+        hoverNavnRef.current = navn;
+        setHoverInfo({ navn, x: e.pixel[0], y: e.pixel[1] });
         map.getViewport().style.cursor = "pointer";
       } else {
+        if (hoverFeatureRef.current) {
+          hoverFeatureRef.current.setStyle(undefined);
+          hoverFeatureRef.current = null;
+        }
+        hoverNavnRef.current = null;
         setHoverInfo(null);
         map.getViewport().style.cursor = "";
       }

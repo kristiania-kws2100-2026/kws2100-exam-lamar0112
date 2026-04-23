@@ -22,7 +22,7 @@
 
 ---
 
-## STATUS PER 2026-04-23 (oppdatert etter Asharib sin økt)
+## STATUS PER 2026-04-23 (oppdatert etter Asharib sin siste økt)
 
 ### ✅ Lamar — ferdig (main)
 - Grunnkart med OSM
@@ -33,7 +33,7 @@
 - Hono-backend på Render.com med PostGIS
 - GitHub Pages deploy via Actions
 
-### ✅ Asharib — ferdig (PR #2 åpen, klar for merge)
+### ✅ Asharib — ferdig (natur-lag + robusthet + dokumentasjon)
 Branch: `lamar/asharib-naturlag`
 - `public/data/nasjonalparker.geojson` — 21 norske nasjonalparker (polygon, EPSG:4326, props: navn/areal_km2)
 - `public/data/verneomrader.geojson` — verneområder (polygon, EPSG:4326, props: navn/vernetype)
@@ -42,14 +42,22 @@ Branch: `lamar/asharib-naturlag`
 - `useMemo` for alle tre VectorSource ✅
 - Hover-stil (mørk/lys grønn polygon, oransje linje) + tooltip med navn ✅
 - Lag i sidebar: Nasjonalparker 🏔️, Verneområder 🌿, Turstier 🥾
+- Robust popup for naturlag (fallback og trygg felthåndtering) ✅
+- Robust hover/tooltip ved manglende felt (unngår tom/undefined navn) ✅
+- Små stilforbedringer for naturlag (kontrast, fill og linjebredde) ✅
+- Tydeligere legend i sidebar for naturlag (polygon/linje-symboler) ✅
+- `README.md` lagt til og oppdatert med prosjektbeskrivelse, datakilder og refleksjon ✅
 
-### ⏳ Samir — gjenstår (branch: lamar/samir-friluft)
+### 🔄 Samir — oppdatert branch funnet, må fortsatt sammenslås kontrollert
+- Brancher funnet: `lamar/samir-friluft` og `samir/punktlag-kvalitet`
 - `public/data/hytter.geojson` — DNT-hytter (Point, props: navn, type, høyde_moh)
 - `public/data/fjelltopper.geojson` — fjelltopper (Point, props: navn, høyde_moh)
 - `public/data/badestrander.geojson` — badestrander (Point, props: navn, kommune)
 - Egne ikoner: 🏠 hytter / ⛰️ fjelltopper / 🏖️ badestrander
 - Hover-stil + tooltip på alle tre lag
 - Klikk → popup med relevant info
+- Verifisert mot Git: punktfiler finnes, og `samir/punktlag-kvalitet` endrer hovedsakelig `src/MapView.tsx`, `src/Popup.tsx`, `src/Sidebar.tsx`.
+- Merk: branchen sin `CLAUDE.md` sier at alt er merget i `main`, men det stemmer ikke fullt ut med faktisk branch-diff. Bruk git-diff som fasit.
 
 ---
 
@@ -57,14 +65,14 @@ Branch: `lamar/asharib-naturlag`
 
 **Gjøres på Lamar sin PC — én ting om gangen med naturlige commits:**
 
-### 1. Merge PR #2 fra Asharib
+### 1. Merge/oppdatere Asharib-arbeid
 ```bash
 git pull origin main   # etter merge på GitHub
 ```
 
 ### 2. Samir sin branch (lamar/samir-friluft)
-Opprett branch, lag GeoJSON-data + lag i MapView + hover + klikk.
-Samme mønster som Asharib — ett lag per commit.
+Punktdata ligger på branch og skal merges kontrollert senere.
+Behold Asharib sin robuste hover/popup-løsning ved sammenslåing.
 
 ### 3. Utvide Popup.tsx — generisk (VIKTIG for A)
 Popup.tsx håndterer i dag bare dyreobservasjoner `{ art, antall, dato }`.
@@ -116,21 +124,11 @@ const kartverketLag = new TileLayer({
 Legg til i App.tsx lag-liste: `{ id: "kartverket", navn: "Kartverket topo", ikon: "🗺️", synlig: false }`
 
 ### 7. README.md
-```markdown
-# Norsk Natur- og Friluftskart
-Gruppeeksamen KWS2100, Høyskolen Kristiania 2026.
-Lamar (lasa020), Asharib (asha023), Samir
-
-## Datakilder
-- Dyreobservasjoner: GBIF / Artsdatabanken
-- Nasjonalparker + Verneområder: Geonorge / Miljødirektoratet (CC BY 4.0)
-- Turstier: Geonorge / Kartverket
-- DNT-hytter + Fjelltopper: Kartverket N50
-- Badestrander: Geonorge
-
-## Teknisk
-React + TypeScript + OpenLayers v10 + Hono + PostGIS på Render.com
-```
+`README.md` er nå lagt til i repo med:
+- prosjektfortelling og gruppekontekst
+- datakilder
+- lokal kjøring (`dev`, `server`, `typecheck`, `build`)
+- teknisk stack og kort refleksjon
 
 ---
 
@@ -143,11 +141,26 @@ React + TypeScript + OpenLayers v10 + Hono + PostGIS på Render.com
 - [ ] Punkt-geometri (Samir)
 - [x] Hover-stil
 - [x] Klikk → vis info (dyr)
-- [ ] Klikk → vis info alle lag (Lamar A-tillegg)
+- [x] Klikk → vis info naturlag (Asharib)
 - [x] VectorLayer med GeoJSON
 - [x] VectorTileLayer (MVT)
 - [x] Cluster-lag
 - [ ] Kartverket WMTS (Lamar A-tillegg)
+
+## Nåværende lokale filer som ikke er pushet ennå
+- Endret: `src/MapView.tsx`
+- Endret: `src/Popup.tsx`
+- Endret: `src/Sidebar.tsx`
+- Endret: `src/sidebar.css`
+- Endret: `CLAUDE.md`
+- Ny: `README.md`
+- Untracked: `slim.mjs` (må avklares før commit)
+
+## Neste steg (anbefalt rekkefølge)
+1. Fullfør og push Asharib-branch med robuste naturlag-endringer + README.
+2. Be Samir åpne PR fra `samir/punktlag-kvalitet` (eller `lamar/samir-friluft`) med kort testplan.
+3. Lamar gjør kontrollert merge, løser konflikter i `MapView`, `Popup`, `Sidebar` uten å miste Asharib-robusthet.
+4. Kjør `npm run typecheck` og `npm run build` etter sammenslåing.
 
 ## Mappestruktur
 ```

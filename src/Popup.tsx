@@ -1,5 +1,8 @@
 interface PopupProps {
-  innhold: { art: string; antall: number; dato: string | null } | null;
+  innhold:
+    | { type: "dyr"; art: string; antall: number; dato: string | null }
+    | { type: "naturlag"; navn: string; kategori: string; detalj: string }
+    | null;
   posisjon: { x: number; y: number } | null;
   onLukk: () => void;
 }
@@ -39,16 +42,32 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
       >
         ✕
       </button>
-      <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
-        🦌 {innhold.art}
-      </p>
-      <p style={{ margin: "0 0 2px", color: "#555" }}>
-        Antall: {innhold.antall}
-      </p>
-      {innhold.dato && (
-        <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
-          {innhold.dato}
-        </p>
+      {innhold.type === "dyr" ? (
+        <>
+          <p style={{ margin: "0 0 4px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🦌 {innhold.art}
+          </p>
+          <p style={{ margin: "0 0 2px", color: "#555" }}>
+            Antall: {innhold.antall}
+          </p>
+          {innhold.dato && (
+            <p style={{ margin: 0, color: "#888", fontSize: "12px" }}>
+              {innhold.dato}
+            </p>
+          )}
+        </>
+      ) : (
+        <>
+          <p style={{ margin: "0 0 2px", fontWeight: "bold", color: "#1e3a2f" }}>
+            🌿 {innhold.navn}
+          </p>
+          <p style={{ margin: "0 0 2px", color: "#444", fontSize: "12px" }}>
+            {innhold.kategori}
+          </p>
+          <p style={{ margin: 0, color: "#666" }}>
+            {innhold.detalj}
+          </p>
+        </>
       )}
     </div>
   );

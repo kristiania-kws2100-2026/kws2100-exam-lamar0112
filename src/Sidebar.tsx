@@ -53,12 +53,23 @@ export default function Sidebar({ lag, setLag }: SidebarProps) {
       <div className="legende">
         <span className="prikk gronn" /> 10+ observasjoner
       </div>
+      <div className="legende-seksjon">Naturlag</div>
+      <div className="legende">
+        <span className="symbol polygon-nasjonalpark" /> Nasjonalpark (flate)
+      </div>
+      <div className="legende">
+        <span className="symbol polygon-naturvern" /> Verneomrade (flate)
+      </div>
+      <div className="legende">
+        <span className="symbol linje-tursti" /> Tursti (linje)
+      </div>
 
       <hr />
 
       <p className="info">
         Data fra <strong>GBIF / Artsdatabanken</strong>. Zoom inn for å se
-        enkeltobservasjoner.
+        enkeltobservasjoner. Hold musepekeren over naturlag for navn og klikk
+        for detaljer.
       </p>
     </div>
   );
