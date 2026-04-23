@@ -23,6 +23,9 @@ import type { FeatureLike } from "ol/Feature";
 // Gir OpenLayers beskjed om å bruke geografiske koordinater (lon/lat) direkte
 useGeographic();
 
+// BASE_URL er "/kws2100-exam-lamar0112/" i prod, "/" lokalt
+const BASE = import.meta.env.BASE_URL;
+
 const API_BASE = import.meta.env.PROD
   ? "https://naturkart-server.onrender.com"
   : "";
@@ -165,7 +168,7 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/verneomrader.geojson",
+        url: `${BASE}data/verneomrader.geojson`,
         format: new GeoJSON(),
       }),
     [],
@@ -174,7 +177,7 @@ export default function MapView({ lag }: MapViewProps) {
   const nasjonalparkSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/nasjonalparker.geojson",
+        url: `${BASE}data/nasjonalparker.geojson`,
         format: new GeoJSON(),
       }),
     [],
@@ -183,7 +186,7 @@ export default function MapView({ lag }: MapViewProps) {
   const turstiSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/turstier.geojson",
+        url: `${BASE}data/turstier.geojson`,
         format: new GeoJSON(),
       }),
     [],
@@ -192,7 +195,7 @@ export default function MapView({ lag }: MapViewProps) {
   const hytterSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/hytter.geojson",
+        url: `${BASE}data/hytter.geojson`,
         format: new GeoJSON(),
       }),
     [],
@@ -201,7 +204,7 @@ export default function MapView({ lag }: MapViewProps) {
   const fjelltopperSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/fjelltopper.geojson",
+        url: `${BASE}data/fjelltopper.geojson`,
         format: new GeoJSON(),
       }),
     [],
@@ -210,7 +213,7 @@ export default function MapView({ lag }: MapViewProps) {
   const badestranderSource = useMemo(
     () =>
       new VectorSource({
-        url: "/data/badestrander.geojson",
+        url: `${BASE}data/badestrander.geojson`,
         format: new GeoJSON(),
       }),
     [],
