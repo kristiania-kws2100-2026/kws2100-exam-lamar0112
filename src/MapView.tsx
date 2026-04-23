@@ -102,7 +102,7 @@ const turstiStil = new Style({
 // Hover-stiler — lysere/tykkere versjon av hvert lag
 const nasjonalparkHoverStil = new Style({
   stroke: new Stroke({ color: "#1b4332", width: 3.2 }),
-  fill: new Fill({ color: "rgba(27, 67, 50, 0.5)" }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.6)" }),
 });
 
 const naturvernHoverStil = new Style({
