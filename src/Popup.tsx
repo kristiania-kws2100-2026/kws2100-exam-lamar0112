@@ -4,7 +4,7 @@ type PopupInnhold =
   | { type: "dyr"; art: string; antall: number; dato: string | null }
   | { type: "nasjonalpark"; navn?: string | null; areal?: number | null }
   | { type: "verneomrade"; navn?: string | null; vernetype?: string | null }
-  | { type: "tursti"; navn?: string | null; lengde?: number | null }
+  | { type: "tursti"; navn?: string | null; lengde?: number | null; vanskelighetsgrad?: string | null; sesong?: string | null }
   | {
       type: "hytte";
       navn?: string | null;
@@ -62,6 +62,12 @@ export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
         <>
           <p className="popup-tittel">🥾 {visTekst(innhold.navn, "Ukjent tursti")}</p>
           <p className="popup-info">{visTall(innhold.lengde, "km")}</p>
+          {innhold.vanskelighetsgrad && (
+            <p className="popup-detalj">Vanskelighetsgrad: {innhold.vanskelighetsgrad}</p>
+          )}
+          {innhold.sesong && (
+            <p className="popup-detalj">Sesong: {innhold.sesong}</p>
+          )}
           <span className="popup-badge" style={{ background: "#fff3e0", color: "#e76f00" }}>Tursti</span>
         </>
       )}

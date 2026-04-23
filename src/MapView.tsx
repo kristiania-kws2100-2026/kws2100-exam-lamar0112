@@ -37,6 +37,7 @@ interface MapViewProps {
 
 type PopupInnhold =
   | { type: "dyr"; art: string; antall: number; dato: string | null }
+  | { type: "tursti"; navn: string; lengde: number | null; vanskelighetsgrad: string | null; sesong: string | null }
   | { type: "naturlag"; navn: string; kategori: string; detalj: string };
 
 function tekstverdi(verdi: unknown, fallback: string): string {
@@ -271,6 +272,20 @@ export default function MapView({ lag }: MapViewProps) {
       const lengde = tallverdi(enkelt.get("lengde_km"));
       const vernetype = tekstverdi(enkelt.get("vernetype"), "Ikke oppgitt");
 
+      if (lengde !== null) {
+        setPopup({
+          innhold: {
+            type: "tursti",
+            navn,
+            lengde,
+            vanskelighetsgrad: tekstverdi(enkelt.get("vanskelighetsgrad"), "") || null,
+            sesong: tekstverdi(enkelt.get("sesong"), "") || null,
+          },
+          posisjon: { x: e.pixel[0], y: e.pixel[1] },
+        });
+        return;
+      }
+
       let kategori = "Naturlag";
       let detalj = "Ingen ekstra felt tilgjengelig";
 
@@ -280,9 +295,6 @@ export default function MapView({ lag }: MapViewProps) {
       } else if (enkelt.get("vernetype") !== undefined) {
         kategori = "Verneomrade";
         detalj = `Vernetype: ${vernetype}`;
-      } else if (lengde !== null) {
-        kategori = "Tursti";
-        detalj = `Lengde: ${lengde.toFixed(2)} km`;
       }
 
       setPopup({
