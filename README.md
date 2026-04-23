@@ -71,3 +71,15 @@ Samir sin kode ble skrevet på Lamar sin PC under pair programming-session 22. a
 - [GBIF](https://www.gbif.org) — dyreobservasjoner (CC BY 4.0)
 - [Geonorge](https://www.geonorge.no) — nasjonalparker, verneområder, turstier, badestrander (CC BY 4.0)
 - [Kartverket N50](https://www.kartverket.no) — hytter, fjelltopper, topokart (CC BY 4.0)
+
+---
+
+## Git og samarbeid (vurderingskontekst)
+
+Vi har jobbet med branch + pull request som anbefalt i emnet. Noe av implementasjonen ble gjort som pair programming ved samme skjerm, og enkelte commits ble derfor registrert på én bruker selv om flere bidro i økten.
+
+- **Lamar**: oppsett, backend, datalasting, deploy, integrasjon og sluttføring
+- **Asharib**: naturlag (polygon/linje), styling og interaksjon
+- **Samir**: punktlag, egenskapsdata og popup-innhold
+
+For å gjøre arbeidsfordeling og pensumdekning tydeligere enn ren commit-telling, er bidragene dokumentert i `CONTRIBUTIONS.md`.
