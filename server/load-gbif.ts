@@ -50,7 +50,7 @@ async function hentSide(offset: number): Promise<{ results: GbifObs[]; endOfReco
 }
 
 async function lastData() {
-  const maks = 3000;
+  const maks = 15000;
   const alleObservasjoner: GbifObs[] = [];
 
   console.log("Henter data fra GBIF (paginert)...");
