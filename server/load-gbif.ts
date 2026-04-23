@@ -36,7 +36,7 @@ async function lastData() {
       class: "Mammalia",
       hasCoordinate: "true",
       hasGeospatialIssue: "false",
-      limit: "300",
+      limit: "5000",
     });
 
   console.log("Henter data fra GBIF...");

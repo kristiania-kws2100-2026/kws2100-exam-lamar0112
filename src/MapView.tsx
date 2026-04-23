@@ -16,6 +16,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import MVT from "ol/format/MVT";
 import { useGeographic } from "ol/proj";
 import { Circle, Fill, Stroke, Style, Text } from "ol/style";
+import OverviewMap from "ol/control/OverviewMap";
 import type Feature from "ol/Feature";
 import type { FeatureLike } from "ol/Feature";
 
@@ -310,6 +311,13 @@ export default function MapView({ lag }: MapViewProps) {
     });
 
     mapRef.current = map;
+
+    // Oversiktskart i hjørnet — viser hvor i Norge du er
+    const oversiktskart = new OverviewMap({
+      collapsed: false,
+      layers: [new TileLayer({ source: new OSM() })],
+    });
+    map.addControl(oversiktskart);
 
     map.on("click", (e) => {
       const feature = map.forEachFeatureAtPixel(e.pixel, (f) => f);
