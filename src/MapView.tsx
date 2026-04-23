@@ -11,20 +11,15 @@ import VectorSource from "ol/source/Vector";
 import VectorTileSource from "ol/source/VectorTile";
 import Cluster from "ol/source/Cluster";
 import OSM from "ol/source/OSM";
-import XYZ from "ol/source/XYZ";
 import GeoJSON from "ol/format/GeoJSON";
 import MVT from "ol/format/MVT";
 import { useGeographic } from "ol/proj";
 import { Circle, Fill, Stroke, Style, Text } from "ol/style";
-import OverviewMap from "ol/control/OverviewMap";
 import type Feature from "ol/Feature";
 import type { FeatureLike } from "ol/Feature";
 
 // Gir OpenLayers beskjed om å bruke geografiske koordinater (lon/lat) direkte
 useGeographic();
-
-// BASE_URL er "/kws2100-exam-lamar0112/" i prod, "/" lokalt
-const BASE = import.meta.env.BASE_URL;
 
 const API_BASE = import.meta.env.PROD
   ? "https://naturkart-server.onrender.com"
@@ -38,6 +33,25 @@ interface Lag {
 
 interface MapViewProps {
   lag: Lag[];
+}
+
+type PopupInnhold =
+  | { type: "dyr"; art: string; antall: number; dato: string | null }
+  | { type: "naturlag"; navn: string; kategori: string; detalj: string };
+
+function tekstverdi(verdi: unknown, fallback: string): string {
+  if (typeof verdi !== "string") return fallback;
+  const trimmet = verdi.trim();
+  return trimmet.length > 0 ? trimmet : fallback;
+}
+
+function tallverdi(verdi: unknown): number | null {
+  if (typeof verdi === "number" && Number.isFinite(verdi)) return verdi;
+  if (typeof verdi === "string" && verdi.trim().length > 0) {
+    const parsed = Number(verdi);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 function clusterStil(feature: FeatureLike): Style {
@@ -77,52 +91,27 @@ const vektorTilStil = new Style({
 });
 
 const nasjonalparkStil = new Style({
-  stroke: new Stroke({ color: "#1b4332", width: 2 }),
-  fill: new Fill({ color: "rgba(27, 67, 50, 0.25)" }),
+  stroke: new Stroke({ color: "#1b4332", width: 2.4 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.32)" }),
 });
 
 const turstiStil = new Style({
-  stroke: new Stroke({ color: "#e76f00", width: 2.5, lineDash: [6, 4] }),
+  stroke: new Stroke({ color: "#e76f00", width: 3, lineDash: [8, 4] }),
 });
 
 // Hover-stiler — lysere/tykkere versjon av hvert lag
 const nasjonalparkHoverStil = new Style({
-  stroke: new Stroke({ color: "#1b4332", width: 3 }),
-  fill: new Fill({ color: "rgba(27, 67, 50, 0.45)" }),
+  stroke: new Stroke({ color: "#1b4332", width: 3.2 }),
+  fill: new Fill({ color: "rgba(27, 67, 50, 0.5)" }),
 });
 
 const naturvernHoverStil = new Style({
-  stroke: new Stroke({ color: "#2d6a4f", width: 3 }),
-  fill: new Fill({ color: "rgba(45, 106, 79, 0.28)" }),
+  stroke: new Stroke({ color: "#2d6a4f", width: 3.2 }),
+  fill: new Fill({ color: "rgba(45, 106, 79, 0.35)" }),
 });
 
 const turstiHoverStil = new Style({
-  stroke: new Stroke({ color: "#e76f00", width: 4, lineDash: [6, 4] }),
-});
-
-// Stiler for punkt-lag
-const hytterStil = new Style({
-  text: new Text({ text: "🏠", font: "18px sans-serif" }),
-});
-
-const hytterHoverStil = new Style({
-  text: new Text({ text: "🏠", font: "22px sans-serif" }),
-});
-
-const fjelltopperStil = new Style({
-  text: new Text({ text: "⛰️", font: "18px sans-serif" }),
-});
-
-const fjelltopperHoverStil = new Style({
-  text: new Text({ text: "⛰️", font: "22px sans-serif" }),
-});
-
-const badestranderStil = new Style({
-  text: new Text({ text: "🏖️", font: "18px sans-serif" }),
-});
-
-const badestranderHoverStil = new Style({
-  text: new Text({ text: "🏖️", font: "22px sans-serif" }),
+  stroke: new Stroke({ color: "#e76f00", width: 4.2, lineDash: [8, 4] }),
 });
 
 export default function MapView({ lag }: MapViewProps) {
@@ -133,31 +122,14 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernLagRef = useRef<VectorLayer | null>(null);
   const nasjonalparkLagRef = useRef<VectorLayer | null>(null);
   const turstiLagRef = useRef<VectorLayer | null>(null);
-  const hytterLagRef = useRef<VectorLayer | null>(null);
-  const fjelltopperLagRef = useRef<VectorLayer | null>(null);
-  const badestranderLagRef = useRef<VectorLayer | null>(null);
-  const kartverketLagRef = useRef<TileLayer | null>(null);
 
   const hoverFeatureRef = useRef<Feature | null>(null);
+  const hoverNavnRef = useRef<string | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
     navn: string;
     x: number;
     y: number;
   } | null>(null);
-
-  type PopupInnhold =
-    | { type: "dyr"; art: string; antall: number; dato: string | null }
-    | { type: "nasjonalpark"; navn?: string | null; areal?: number | null }
-    | { type: "verneomrade"; navn?: string | null; vernetype?: string | null }
-    | { type: "tursti"; navn?: string | null; lengde?: number | null }
-    | {
-        type: "hytte";
-        navn?: string | null;
-        hyttetype?: string | null;
-        høyde?: number | null;
-      }
-    | { type: "fjelltopp"; navn?: string | null; høyde?: number | null }
-    | { type: "badestrand"; navn?: string | null; kommune?: string | null };
 
   const [popup, setPopup] = useState<{
     innhold: PopupInnhold;
@@ -168,7 +140,7 @@ export default function MapView({ lag }: MapViewProps) {
   const naturvernSource = useMemo(
     () =>
       new VectorSource({
-        url: `${BASE}data/verneomrader.geojson`,
+        url: "/data/verneomrader.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -177,7 +149,7 @@ export default function MapView({ lag }: MapViewProps) {
   const nasjonalparkSource = useMemo(
     () =>
       new VectorSource({
-        url: `${BASE}data/nasjonalparker.geojson`,
+        url: "/data/nasjonalparker.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -186,34 +158,7 @@ export default function MapView({ lag }: MapViewProps) {
   const turstiSource = useMemo(
     () =>
       new VectorSource({
-        url: `${BASE}data/turstier.geojson`,
-        format: new GeoJSON(),
-      }),
-    [],
-  );
-
-  const hytterSource = useMemo(
-    () =>
-      new VectorSource({
-        url: `${BASE}data/hytter.geojson`,
-        format: new GeoJSON(),
-      }),
-    [],
-  );
-
-  const fjelltopperSource = useMemo(
-    () =>
-      new VectorSource({
-        url: `${BASE}data/fjelltopper.geojson`,
-        format: new GeoJSON(),
-      }),
-    [],
-  );
-
-  const badestranderSource = useMemo(
-    () =>
-      new VectorSource({
-        url: `${BASE}data/badestrander.geojson`,
+        url: "/data/turstier.geojson",
         format: new GeoJSON(),
       }),
     [],
@@ -223,15 +168,6 @@ export default function MapView({ lag }: MapViewProps) {
     if (mapRef.current) return;
 
     const osmLag = new TileLayer({ source: new OSM() });
-
-    // Kartverket topografisk kart (WMTS via XYZ-kilde)
-    const kartverketLag = new TileLayer({
-      source: new XYZ({
-        url: "https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png",
-        attributions: "© Kartverket",
-      }),
-      visible: false,
-    });
 
     const clusterLag = new VectorLayer({
       source: new Cluster({
@@ -257,8 +193,8 @@ export default function MapView({ lag }: MapViewProps) {
     const naturvernLag = new VectorLayer({
       source: naturvernSource,
       style: new Style({
-        stroke: new Stroke({ color: "#2d6a4f", width: 2 }),
-        fill: new Fill({ color: "rgba(45, 106, 79, 0.1)" }),
+        stroke: new Stroke({ color: "#2d6a4f", width: 2.2 }),
+        fill: new Fill({ color: "rgba(45, 106, 79, 0.2)" }),
       }),
     });
 
@@ -272,42 +208,19 @@ export default function MapView({ lag }: MapViewProps) {
       style: turstiStil,
     });
 
-    const hytterLag = new VectorLayer({
-      source: hytterSource,
-      style: hytterStil,
-    });
-
-    const fjelltopperLag = new VectorLayer({
-      source: fjelltopperSource,
-      style: fjelltopperStil,
-    });
-
-    const badestranderLag = new VectorLayer({
-      source: badestranderSource,
-      style: badestranderStil,
-    });
-
     clusterLagRef.current = clusterLag;
     vektorTilLagRef.current = vektorTilLag;
     naturvernLagRef.current = naturvernLag;
     nasjonalparkLagRef.current = nasjonalparkLag;
     turstiLagRef.current = turstiLag;
-    hytterLagRef.current = hytterLag;
-    fjelltopperLagRef.current = fjelltopperLag;
-    badestranderLagRef.current = badestranderLag;
-    kartverketLagRef.current = kartverketLag;
 
     const map = new Map({
       target: mapDivRef.current!,
       layers: [
         osmLag,
-        kartverketLag,
         naturvernLag,
         nasjonalparkLag,
         turstiLag,
-        hytterLag,
-        fjelltopperLag,
-        badestranderLag,
         vektorTilLag,
         clusterLag,
       ],
@@ -320,13 +233,6 @@ export default function MapView({ lag }: MapViewProps) {
 
     mapRef.current = map;
 
-    // Oversiktskart i hjørnet — viser hvor i Norge du er
-    const oversiktskart = new OverviewMap({
-      collapsed: false,
-      layers: [new TileLayer({ source: new OSM() })],
-    });
-    map.addControl(oversiktskart);
-
     map.on("click", (e) => {
       const feature = map.forEachFeatureAtPixel(e.pixel, (f) => f);
 
@@ -338,124 +244,66 @@ export default function MapView({ lag }: MapViewProps) {
       const features = feature.get("features") as FeatureLike[] | undefined;
       const enkelt = features ? features[0] : feature;
 
-      if (!enkelt) return;
+      if (!enkelt) {
+        setPopup(null);
+        return;
+      }
 
-      const pos = { x: e.pixel[0], y: e.pixel[1] };
-      const tekst = (verdi: unknown): string | null =>
-        typeof verdi === "string" && verdi.trim() ? verdi.trim() : null;
-      const tall = (verdi: unknown): number | null =>
-        typeof verdi === "number" && Number.isFinite(verdi) ? verdi : null;
-
-      // Nasjonalparker — har areal_km2
-      if (enkelt.get("areal_km2") !== undefined) {
+      const art = enkelt.get("art");
+      if (art !== undefined) {
         setPopup({
           innhold: {
-            type: "nasjonalpark",
-            navn: tekst(enkelt.get("navn")),
-            areal: tall(enkelt.get("areal_km2")),
+            type: "dyr",
+            art: tekstverdi(art, "Ukjent art"),
+            antall: tallverdi(enkelt.get("antall")) ?? 1,
+            dato:
+              typeof enkelt.get("observert_dato") === "string"
+                ? enkelt.get("observert_dato")
+                : null,
           },
-          posisjon: pos,
+          posisjon: { x: e.pixel[0], y: e.pixel[1] },
         });
         return;
       }
 
-      // Verneområder — har vernetype
-      if (enkelt.get("vernetype") !== undefined) {
-        setPopup({
-          innhold: {
-            type: "verneomrade",
-            navn: tekst(enkelt.get("navn")),
-            vernetype: tekst(enkelt.get("vernetype")),
-          },
-          posisjon: pos,
-        });
-        return;
+      const navn = tekstverdi(enkelt.get("navn"), "Uten navn");
+      const areal = tallverdi(enkelt.get("areal_km2"));
+      const lengde = tallverdi(enkelt.get("lengde_km"));
+      const vernetype = tekstverdi(enkelt.get("vernetype"), "Ikke oppgitt");
+
+      let kategori = "Naturlag";
+      let detalj = "Ingen ekstra felt tilgjengelig";
+
+      if (areal !== null) {
+        kategori = "Nasjonalpark";
+        detalj = `Areal: ${areal.toFixed(2)} km²`;
+      } else if (enkelt.get("vernetype") !== undefined) {
+        kategori = "Verneomrade";
+        detalj = `Vernetype: ${vernetype}`;
+      } else if (lengde !== null) {
+        kategori = "Tursti";
+        detalj = `Lengde: ${lengde.toFixed(2)} km`;
       }
 
-      // Turstier — har lengde_km
-      if (enkelt.get("lengde_km") !== undefined) {
-        setPopup({
-          innhold: {
-            type: "tursti",
-            navn: tekst(enkelt.get("navn")),
-            lengde: tall(enkelt.get("lengde_km")),
-          },
-          posisjon: pos,
-        });
-        return;
-      }
-
-      // Sjekk hyttetype-prop for DNT-hytter
-      if (enkelt.get("type") !== undefined && enkelt.get("høyde_moh") !== undefined) {
-        setPopup({
-          innhold: {
-            type: "hytte",
-            navn: tekst(enkelt.get("navn")),
-            hyttetype: tekst(enkelt.get("type")),
-            høyde: tall(enkelt.get("høyde_moh")),
-          },
-          posisjon: pos,
-        });
-        return;
-      }
-
-      // Fjelltopper — har høyde_moh men ikke type
-      if (enkelt.get("høyde_moh") !== undefined) {
-        setPopup({
-          innhold: {
-            type: "fjelltopp",
-            navn: tekst(enkelt.get("navn")),
-            høyde: tall(enkelt.get("høyde_moh")),
-          },
-          posisjon: pos,
-        });
-        return;
-      }
-
-      // Badestrander — har kommune-prop
-      if (enkelt.get("kommune") !== undefined) {
-        setPopup({
-          innhold: {
-            type: "badestrand",
-            navn: tekst(enkelt.get("navn")),
-            kommune: tekst(enkelt.get("kommune")),
-          },
-          posisjon: pos,
-        });
-        return;
-      }
-
-      // Dyreobservasjoner (cluster eller enkelt)
       setPopup({
-        innhold: {
-          type: "dyr",
-          art: enkelt.get("art") ?? "Ukjent art",
-          antall: enkelt.get("antall") ?? 1,
-          dato: enkelt.get("observert_dato") ?? null,
-        },
-        posisjon: pos,
+        innhold: { type: "naturlag", navn, kategori, detalj },
+        posisjon: { x: e.pixel[0], y: e.pixel[1] },
       });
     });
 
     map.on("pointermove", (e) => {
-      // Nullstill forrige hover-feature
-      if (hoverFeatureRef.current) {
-        hoverFeatureRef.current.setStyle(undefined);
-        hoverFeatureRef.current = null;
-      }
-
       const treff = map.forEachFeatureAtPixel(e.pixel, (f) => f, {
         layerFilter: (l) =>
-          l === naturvernLag ||
-          l === nasjonalparkLag ||
-          l === turstiLag ||
-          l === hytterLag ||
-          l === fjelltopperLag ||
-          l === badestranderLag,
+          l === naturvernLag || l === nasjonalparkLag || l === turstiLag,
       });
 
       if (treff) {
         const feature = treff as Feature;
+
+        // Unngar unodvendig reset/repaint nar musepeker blir pa samme feature.
+        if (hoverFeatureRef.current && hoverFeatureRef.current !== feature) {
+          hoverFeatureRef.current.setStyle(undefined);
+        }
         hoverFeatureRef.current = feature;
 
         if (feature.get("areal_km2") !== undefined) {
@@ -464,20 +312,18 @@ export default function MapView({ lag }: MapViewProps) {
           feature.setStyle(naturvernHoverStil);
         } else if (feature.get("lengde_km") !== undefined) {
           feature.setStyle(turstiHoverStil);
-        } else if (feature.get("type") !== undefined) {
-          feature.setStyle(hytterHoverStil);
-        } else if (feature.get("høyde_moh") !== undefined) {
-          feature.setStyle(fjelltopperHoverStil);
-        } else if (feature.get("kommune") !== undefined) {
-          feature.setStyle(badestranderHoverStil);
         }
 
-        const navn = feature.get("navn") as string | undefined;
-        setHoverInfo(
-          navn ? { navn, x: e.pixel[0], y: e.pixel[1] } : null,
-        );
+        const navn = tekstverdi(feature.get("navn"), "Ukjent omrade");
+        hoverNavnRef.current = navn;
+        setHoverInfo({ navn, x: e.pixel[0], y: e.pixel[1] });
         map.getViewport().style.cursor = "pointer";
       } else {
+        if (hoverFeatureRef.current) {
+          hoverFeatureRef.current.setStyle(undefined);
+          hoverFeatureRef.current = null;
+        }
+        hoverNavnRef.current = null;
         setHoverInfo(null);
         map.getViewport().style.cursor = "";
       }
@@ -487,7 +333,7 @@ export default function MapView({ lag }: MapViewProps) {
       mapRef.current?.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource, badestranderSource]);
+  }, [naturvernSource, nasjonalparkSource, turstiSource]);
 
   useEffect(() => {
     for (const l of lag) {
@@ -497,20 +343,6 @@ export default function MapView({ lag }: MapViewProps) {
       if (l.id === "nasjonalpark")
         nasjonalparkLagRef.current?.setVisible(l.synlig);
       if (l.id === "tursti") turstiLagRef.current?.setVisible(l.synlig);
-      if (l.id === "hytter") hytterLagRef.current?.setVisible(l.synlig);
-      if (l.id === "fjelltopper")
-        fjelltopperLagRef.current?.setVisible(l.synlig);
-      if (l.id === "badestrander")
-        badestranderLagRef.current?.setVisible(l.synlig);
-      if (l.id === "kartverket") {
-        kartverketLagRef.current?.setVisible(l.synlig);
-        // OSM skjules når Kartverket er aktiv
-        const osmLayers = mapRef.current
-          ?.getLayers()
-          .getArray()
-          .filter((l) => l instanceof TileLayer && l !== kartverketLagRef.current);
-        osmLayers?.forEach((osm) => osm.setVisible(!l.synlig));
-      }
     }
   }, [lag]);
 
@@ -521,15 +353,18 @@ export default function MapView({ lag }: MapViewProps) {
         <div
           style={{
             position: "absolute",
-            left: hoverInfo.x + 12,
-            top: hoverInfo.y - 8,
-            background: "rgba(0,0,0,0.75)",
-            color: "white",
-            padding: "4px 8px",
-            borderRadius: 4,
+            left: hoverInfo.x + 14,
+            top: hoverInfo.y - 36,
+            background: "rgba(255,255,255,0.96)",
+            color: "#1e3a2f",
+            padding: "6px 12px",
+            borderRadius: "20px",
             fontSize: 13,
+            fontWeight: 600,
             pointerEvents: "none",
             whiteSpace: "nowrap",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.18)",
+            border: "1px solid rgba(27,67,50,0.2)",
           }}
         >
           {hoverInfo.navn}
