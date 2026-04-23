@@ -46,15 +46,24 @@ export default function Sidebar({ lag, setLag }: SidebarProps) {
       <h3>Forklaring</h3>
       <div className="legende">
         <span className="legende-boks" style={{ background: "#1b4332", border: "1px solid #1b4332" }} />
-        Nasjonalpark
+        Nasjonalpark (polygon)
       </div>
       <div className="legende">
         <span className="legende-boks" style={{ background: "rgba(45,106,79,0.4)", border: "1px solid #2d6a4f" }} />
-        Verneområde
+        Verneområde (polygon)
       </div>
       <div className="legende">
         <span className="legende-linje" style={{ background: "#e76f00" }} />
-        Tursti
+        Tursti (linje)
+      </div>
+      <div className="legende">
+        <span className="prikk" style={{ background: "#2f2f2f" }} /> DNT-hytte (punkt)
+      </div>
+      <div className="legende">
+        <span className="prikk" style={{ background: "#4b4b4b" }} /> Fjelltopp (punkt)
+      </div>
+      <div className="legende">
+        <span className="prikk" style={{ background: "#777" }} /> Badestrand (punkt)
       </div>
       <div className="legende">
         <span className="prikk rod" /> 1 dyreobs.
