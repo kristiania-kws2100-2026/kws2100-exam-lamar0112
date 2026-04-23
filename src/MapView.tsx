@@ -111,7 +111,7 @@ const naturvernHoverStil = new Style({
 });
 
 const turstiHoverStil = new Style({
-  stroke: new Stroke({ color: "#e76f00", width: 4.2, lineDash: [8, 4] }),
+  stroke: new Stroke({ color: "#e76f00", width: 6, lineDash: [6, 4] }),
 });
 
 export default function MapView({ lag }: MapViewProps) {
