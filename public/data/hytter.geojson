@@ -60,6 +60,31 @@
       "type": "Feature",
       "geometry": { "type": "Point", "coordinates": [7.9614, 60.3172] },
       "properties": { "navn": "Finse 1222", "type": "Betjent", "høyde_moh": 1222 }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Finse 1222", "type": "Betjent hytte", "høyde_moh": 1222 },
+      "geometry": { "type": "Point", "coordinates": [7.5272, 60.5953] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Trollstigen fjellstue", "type": "Ubetjent hytte", "høyde_moh": 850 },
+      "geometry": { "type": "Point", "coordinates": [7.6683, 62.4542] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Bessheim", "type": "Betjent hytte", "høyde_moh": 994 },
+      "geometry": { "type": "Point", "coordinates": [8.8702, 61.5372] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Gjendesheim", "type": "Betjent hytte", "høyde_moh": 995 },
+      "geometry": { "type": "Point", "coordinates": [8.5447, 61.4972] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "navn": "Jotunheimen turisthytte", "type": "Betjent hytte", "høyde_moh": 1150 },
+      "geometry": { "type": "Point", "coordinates": [8.3521, 61.5847] }
     }
   ]
 }
