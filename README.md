@@ -408,6 +408,8 @@ Returnerer dyreobservasjoner som Mapbox Vector Tiles. Dette brukes ved høyere z
 
 Dyreobservasjonene hentes fra GBIF sitt API. Vi filtrerer på Norge og relevante observasjoner med koordinater. Dataene lagres i PostgreSQL/PostGIS, slik at backend kan servere dem videre til kartet.
 
+Noen observasjoner og cluster-symboler kan vises nær riksgrensen, fordi GBIF-data bygger på registrerte koordinater og fordi cluster-symboler plasseres som en samlet representasjon av flere punkter.
+
 ### Miljødirektoratet og Geonorge
 
 Nasjonalparker, verneområder og andre naturdata er basert på åpne geografiske datasett fra norske kilder som Miljødirektoratet og Geonorge.
