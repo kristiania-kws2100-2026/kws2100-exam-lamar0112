@@ -192,7 +192,7 @@ Prosjektet er delt inn slik:
 │       ├── nasjonalparker.geojson
 │       ├── verneomrader.geojson
 │       ├── turstier.geojson
-│       ├── dnt_hytter.geojson
+│       ├── hytter.geojson
 │       ├── fjelltopper.geojson
 │       └── badestrender.geojson
 ├── server/
