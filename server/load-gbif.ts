@@ -1,6 +1,7 @@
-// Laster dyreobservasjoner fra GBIF (Artsdatabanken) inn i PostGIS
+// Dette scriptet brukes til å hente dyreobservasjoner (Artsdatabanken) fra GBIF og lagre dem i PostGIS.
+// Vi kjører det manuelt når databasen skal fylles med et stort datasett til backend-løsningen.
 import pg from "pg";
-
+// Bruker Render-databasen når DATABASE_URL er satt, ellers lokal PostGIS fra docker-compose.
 const db = new pg.Pool({
   connectionString:
     process.env.DATABASE_URL ||
@@ -16,7 +17,8 @@ type GbifObs = {
   decimalLatitude: number;
   decimalLongitude: number;
 };
-
+// Oppretter PostGIS-tabellen hvis den ikke finnes fra før.
+// GIST-indeksen gjør geografiske spørringer raskere når dataene senere brukes til kart og vector tiles.
 async function opprettTabell() {
   await db.query(`CREATE EXTENSION IF NOT EXISTS postgis`);
   await db.query(`
@@ -33,7 +35,8 @@ async function opprettTabell() {
   );
   console.log("Tabell klar");
 }
-
+// GBIF returnerer data i sider. Derfor henter vi 300 observasjoner om gangen
+// og bruker offset for å gå videre til neste side.
 async function hentSide(offset: number): Promise<{ results: GbifObs[]; endOfRecords: boolean }> {
   const url =
     "https://api.gbif.org/v1/occurrence/search?" +
@@ -48,7 +51,9 @@ async function hentSide(offset: number): Promise<{ results: GbifObs[]; endOfReco
   const res = await fetch(url);
   return res.json() as Promise<{ results: GbifObs[]; endOfRecords: boolean }>;
 }
-
+// A-kravet i eksamen ber om titalls tusen features fra backend.
+// Derfor henter vi opptil 30 000 observasjoner i stedet for bare noen få testpunkter.
+const maks = 30000;
 async function lastData() {
   const maks = 30000;
   const alleObservasjoner: GbifObs[] = [];
@@ -63,9 +68,10 @@ async function lastData() {
   }
 
   console.log(`Totalt ${alleObservasjoner.length} observasjoner — laster inn...`);
-
+  // Vi tømmer tabellen før ny import, slik at vi ikke får duplikater hvis scriptet kjøres flere ganger.
   await db.query("DELETE FROM dyreobservasjoner");
-
+  // Hver observasjon lagres som et punkt i WGS84/EPSG:4326.
+  // Lengdegrad må inn før breddegrad i ST_MakePoint.
   for (const obs of alleObservasjoner) {
     if (!obs.decimalLatitude || !obs.decimalLongitude) continue;
     await db.query(

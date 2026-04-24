@@ -27,7 +27,8 @@ useGeographic();
 
 // BASE_URL er "/kws2100-exam-lamar0112/" i prod, "/" lokalt
 const BASE = import.meta.env.BASE_URL;
-
+// I produksjon må API-kall gå til Render-backend.
+// Lokalt brukes Vite-proxyen, derfor er API_BASE tom i utvikling.
 const API_BASE = import.meta.env.PROD
   ? "https://naturkart-server.onrender.com"
   : "";
@@ -43,7 +44,8 @@ interface MapViewProps {
   onSynligeFjelltopperEndret?: (topper: FjelltoppInfo[]) => void;
   zoomMal?: ZoomMal | null;
 }
-
+// Popup-typen samler de ulike egenskapene som finnes i kartlagene.
+// Dette gjør at Popup-komponenten kan vise riktig informasjon for hvert lag.
 type PopupInnhold =
   | { type: "dyr"; art: string; antall: number; dato: string | null }
   | { type: "nasjonalpark"; navn: string; areal: number | null }
@@ -52,7 +54,7 @@ type PopupInnhold =
   | { type: "hytte"; navn: string; hyttetype: string; høyde: number | null }
   | { type: "fjelltopp"; navn: string; høyde: number | null }
   | { type: "badestrand"; navn: string; kommune: string };
-
+// Små hjelpefunksjoner som gjør popup-data tryggere hvis et datasett mangler verdier.
 function tekstverdi(verdi: unknown, fallback: string): string {
   if (typeof verdi !== "string") return fallback;
   const trimmet = verdi.trim();
@@ -63,7 +65,8 @@ function tallverdi(verdi: unknown): number | null {
   if (typeof verdi === "number" && Number.isFinite(verdi)) return verdi;
   return null;
 }
-
+// Cluster-stilen samler mange dyreobservasjoner til ett symbol ved lav zoom.
+// Det gjør kartet mer lesbart når datasettet inneholder mange tusen punkter.
 function clusterStil(feature: FeatureLike): Style {
   const features = feature.get("features") as FeatureLike[];
   const antall = features.length;
@@ -90,7 +93,7 @@ function clusterStil(feature: FeatureLike): Style {
     }),
   });
 }
-
+// Enkel stil for detaljerte dyreobservasjoner som kommer fra vector tiles.
 const vektorTilStil = new Style({
   text: new Text({ text: "🦌", font: "14px sans-serif" }),
 });
@@ -141,19 +144,20 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
   const hoverFeatureRef = useRef<Feature | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{ navn: string; x: number; y: number } | null>(null);
   const [popup, setPopup] = useState<{ innhold: PopupInnhold; posisjon: { x: number; y: number } } | null>(null);
-
+  // GeoJSON-kildene opprettes med useMemo slik at de ikke lages på nytt ved hver render.
+  // Det gjør OpenLayers-oppsettet mer stabilt i React.
   const naturvernSource = useMemo(() => new VectorSource({ url: `${BASE}data/verneomrader.geojson`, format: new GeoJSON() }), []);
   const nasjonalparkSource = useMemo(() => new VectorSource({ url: `${BASE}data/nasjonalparker.geojson`, format: new GeoJSON() }), []);
   const turstiSource = useMemo(() => new VectorSource({ url: `${BASE}data/turstier.geojson`, format: new GeoJSON() }), []);
   const hytterSource = useMemo(() => new VectorSource({ url: `${BASE}data/hytter.geojson`, format: new GeoJSON() }), []);
   const fjelltopperSource = useMemo(() => new VectorSource({ url: `${BASE}data/fjelltopper.geojson`, format: new GeoJSON() }), []);
   const badestranderSource = useMemo(() => new VectorSource({ url: `${BASE}data/badestrander.geojson`, format: new GeoJSON() }), []);
-
+  // Dette useEffect-oppsettet kjører én gang og bygger selve OpenLayers-kartet.
   useEffect(() => {
     if (mapRef.current) return;
 
     const osmLag = new TileLayer({ source: new OSM() });
-
+// Kartverket-laget er et ekstra bakgrunnskart som passer bedre til friluftsliv enn vanlig veikart.
     const kartverketLag = new TileLayer({
       source: new XYZ({
         url: "https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png",
@@ -161,7 +165,8 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
       }),
       visible: false,
     });
-
+// Ved lavere zoom bruker vi GeoJSON + Cluster.
+// Da får brukeren oversikt uten at 30 000 observasjoner tegnes som enkeltpunkter.
     const clusterLag = new VectorLayer({
       source: new Cluster({
         distance: 40,
@@ -170,7 +175,8 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
       style: clusterStil,
       maxZoom: 12,
     });
-
+// Ved høyere zoom bruker vi vector tiles fra backend.
+// Dette er mer effektivt for store datasett fordi kartet bare henter flisene som trengs.
     const vektorTilLag = new VectorTileLayer({
       source: new VectorTileSource({ format: new MVT(), url: `${API_BASE}/api/tiles/dyr/{z}/{x}/{y}` }),
       style: vektorTilStil,
@@ -197,7 +203,7 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
     fjelltopperLagRef.current = fjelltopperLag;
     badestranderLagRef.current = badestranderLag;
     kartverketLagRef.current = kartverketLag;
-
+// OverviewMap gir brukeren en liten oversikt over hvor hovedkartet befinner seg.
     const oversiktskart = new OverviewMap({
       collapsed: false,
       layers: [new TileLayer({ source: new OSM() })],
@@ -211,11 +217,12 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
 
     map.addControl(oversiktskart);
     mapRef.current = map;
-
+// Klikk på kartet finner nærmeste feature og bygger popup-innhold ut fra hvilke egenskaper laget har.
     map.on("click", (e) => {
       const feature = map.forEachFeatureAtPixel(e.pixel, (f) => f);
       if (!feature) { setPopup(null); return; }
-
+// Cluster-features inneholder en liste med originale features.
+// Hvis brukeren klikker på en cluster, bruker vi første observasjon som eksempel i popupen.
       const features = feature.get("features") as FeatureLike[] | undefined;
       const enkelt = features ? features[0] : feature;
       if (!enkelt) { setPopup(null); return; }
@@ -249,7 +256,7 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
 
       setPopup({ innhold: { type: "dyr", art: tekstverdi(enkelt.get("art"), "Ukjent art"), antall: tallverdi(enkelt.get("antall")) ?? 1, dato: typeof enkelt.get("observert_dato") === "string" ? enkelt.get("observert_dato") : null }, posisjon: pos });
     });
-
+// Hover brukes for å gi visuell respons og gjøre det tydelig hvilke objekter som er klikkbare.
     map.on("pointermove", (e) => {
       if (hoverFeatureRef.current) {
         hoverFeatureRef.current.setStyle(undefined);
@@ -280,7 +287,8 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
       }
     });
 
-    // Oppdater synlige fjelltopper i sidepanelet
+    // Finner fjelltopper innenfor nåværende kartutsnitt og sender dem til sidepanelet.
+    // Listen sorteres etter høyde slik at de mest markante toppene vises først.
     const oppdaterSynligeTopper = () => {
       if (!onSynligeFjelltopperEndret) return;
       const extent = map.getView().calculateExtent(map.getSize());
@@ -305,7 +313,8 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
     };
   }, [naturvernSource, nasjonalparkSource, turstiSource, hytterSource, fjelltopperSource, badestranderSource, onSynligeFjelltopperEndret]);
 
-  // Zoom-animasjon når bruker klikker en fjelltopp i sidepanelet
+  // Zoom-animasjon når brukeren klikker på en fjelltopp i sidepanelet.
+// Før vi zoomer inn, lagres forrige kartutsnitt slik at brukeren kan gå tilbake.
   useEffect(() => {
     if (!zoomMal || !mapRef.current) return;
     const view = mapRef.current.getView();
@@ -316,7 +325,7 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
 
     view.animate({ center: zoomMal.koordinater, zoom: zoomMal.zoom, duration: 800 });
   }, [zoomMal]);
-
+// Synkroniserer avkryssingene i sidepanelet med synligheten til OpenLayers-lagene.
   useEffect(() => {
     for (const l of lag) {
       if (l.id === "cluster") clusterLagRef.current?.setVisible(l.synlig);
@@ -327,6 +336,7 @@ export default function MapView({ lag, onSynligeFjelltopperEndret, zoomMal }: Ma
       if (l.id === "hytter") hytterLagRef.current?.setVisible(l.synlig);
       if (l.id === "fjelltopper") fjelltopperLagRef.current?.setVisible(l.synlig);
       if (l.id === "badestrander") badestranderLagRef.current?.setVisible(l.synlig);
+      // Når Kartverket-laget slås på, skjules OSM-bakgrunnen slik at bakgrunnskartene ikke ligger oppå hverandre.
       if (l.id === "kartverket") {
         kartverketLagRef.current?.setVisible(l.synlig);
         mapRef.current?.getLayers().getArray().filter((layer) => layer instanceof TileLayer && layer !== kartverketLagRef.current).forEach((osm) => osm.setVisible(!l.synlig));

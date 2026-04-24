@@ -26,12 +26,13 @@ export default function Sidebar({
   onGaTilbake,
   harTilbake,
 }: SidebarProps) {
+  // Oppdaterer React-state for kartlagene. MapView bruker samme state til å styre OpenLayers-lagene.
   function toggleLag(id: string) {
     setLag((forrige) =>
       forrige.map((l) => (l.id === id ? { ...l, synlig: !l.synlig } : l)),
     );
   }
-
+// Sidepanelet samler lagkontroll, fjelltoppliste og tegnforklaring i ett brukergrensesnitt.
   return (
     <div className="sidebar">
       <div className="sidebar-header">

@@ -19,7 +19,8 @@ interface PopupProps {
   posisjon: { x: number; y: number } | null;
   onLukk: () => void;
 }
-
+// Popupen får data fra flere ulike kartlag. Disse hjelpefunksjonene gir ryddig fallback
+// hvis et felt mangler eller har feil format.
 const visTekst = (verdi: unknown, fallback = "Ikke oppgitt"): string => {
   if (typeof verdi === "string" && verdi.trim().length > 0) return verdi.trim();
   return fallback;
@@ -31,7 +32,7 @@ const visTall = (verdi: unknown, unit: string, fallback = "Ikke oppgitt"): strin
   }
   return fallback;
 };
-
+// Viser forskjellig innhold basert på hvilken type kartobjekt brukeren har klikket på.
 export default function Popup({ innhold, posisjon, onLukk }: PopupProps) {
   if (!innhold || !posisjon) return null;
 

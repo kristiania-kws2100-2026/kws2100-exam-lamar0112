@@ -2,7 +2,8 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Sidebar from "./Sidebar";
 import type { FjelltoppInfo, ZoomMal } from "./types";
-
+// Startoppsett for kartlagene i sidepanelet.
+// Disse id-ene brukes senere til å slå riktige OpenLayers-lag av og på.
 const STARTLAG = [
   { id: "cluster", navn: "Dyreobservasjoner", ikon: "🦌", synlig: true },
   { id: "vektortil", navn: "Detaljerte observasjoner", ikon: "🔬", synlig: true },
@@ -19,10 +20,11 @@ export default function App() {
   const [lag, setLag] = useState(STARTLAG);
   const [synligeFjelltopper, setSynligeFjelltopper] = useState<FjelltoppInfo[]>([]);
   const [zoomMal, setZoomMal] = useState<ZoomMal | null>(null);
+  // Brukes for å vise tilbake-knapp etter at brukeren har zoomet til en fjelltopp.
   const [harTilbake, setHarTilbake] = useState(
     () => !!sessionStorage.getItem("forrigeVisning"),
   );
-
+// Sender et zoom-mål til MapView når brukeren klikker på en fjelltopp i sidepanelet.
   function zoomTilTopp(koordinater: [number, number]) {
     setHarTilbake(true);
     setZoomMal((prev) => ({
@@ -32,7 +34,8 @@ export default function App() {
       erTilbake: false,
     }));
   }
-
+// Henter forrige kartutsnitt fra sessionStorage, slik at brukeren kan gå tilbake
+// etter å ha zoomet inn på en fjelltopp.
   function gaTilbake() {
     const lagret = sessionStorage.getItem("forrigeVisning");
     if (!lagret) return;
