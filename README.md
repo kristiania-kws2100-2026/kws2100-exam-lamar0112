@@ -9,6 +9,10 @@ Gruppeeksamen i KWS2100 Kartbaserte websystemer, Høyskolen Kristiania 2026.
 **Live nettside:** https://kristiania-kws2100-2026.github.io/kws2100-exam-lamar0112/  
 **Backend:** https://naturkart-server.onrender.com
 
+## Kort oppsummert
+
+Interaktivt kart over norsk natur og friluftsliv (nasjonalparker, turstier, DNT-hytter, fjelltopper) kombinert med dyreobservasjoner fra GBIF/Artsdatabanken. Bygget med React, TypeScript, Vite og OpenLayers på frontend, og en egen Hono-backend med PostgreSQL/PostGIS som server dyreobservasjonene som vector tiles for å håndtere store datamengder (16 000+ observasjoner) uten at kartet blir tregt. Min rolle og bidrag er beskrevet under "Arbeidsfordeling" lenger ned.
+
 ---
 
 ## Kort om prosjektet
